@@ -39,10 +39,20 @@ function showUpdateNotification(version: string): void {
 }
 
 function isNewerVersion(latestVersion: string, currentVersion: string): boolean {
-  const parse = (v: string): number[] => v.replace(/^v/, '').split('.').map(Number);
-  const [latestMajor, latestMinor, latestPatch] = parse(latestVersion);
-  const [currentMajor, currentMinor, currentPatch] = parse(currentVersion);
-  if (latestMajor !== currentMajor) return latestMajor > currentMajor;
-  if (latestMinor !== currentMinor) return latestMinor > currentMinor;
+  const [latestMajor, latestMinor, latestPatch] = parseVersion(latestVersion);
+  const [currentMajor, currentMinor, currentPatch] = parseVersion(currentVersion);
+
+  if (latestMajor !== currentMajor) {
+    return latestMajor > currentMajor;
+  }
+
+  if (latestMinor !== currentMinor) {
+    return latestMinor > currentMinor;
+  }
+
   return latestPatch > currentPatch;
+}
+
+function parseVersion(versionString: string): number[] {
+  return versionString.replace(/^v/, '').split('.').map(Number);
 }
