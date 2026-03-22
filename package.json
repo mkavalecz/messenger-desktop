@@ -24,7 +24,8 @@
     },
     "files": [
       "out/**/*",
-      "icons/**/*"
+      "icons/**/*",
+      "assets/**/*"
     ],
     "win": {
       "icon": "icons/icon.ico",

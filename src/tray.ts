@@ -1,6 +1,7 @@
 import type { MenuItemConstructorOptions, NativeImage } from 'electron';
 import { app, Menu, nativeImage, Tray } from 'electron';
 import { TRAY_ICON_PATH } from './util/constants';
+import { showAboutWindow } from './about';
 import { saveSettings, settings } from './persistence/settings';
 import { isRunOnStartup, setRunOnStartup } from './util/startup';
 import { makeBadgeIcon } from './util/badge';
@@ -107,6 +108,12 @@ function buildMenu(): Menu {
       click: toggleSetting('check_for_updates')
     },
     { type: 'separator' },
+    {
+      label: 'About',
+      click: () => {
+        showAboutWindow();
+      }
+    },
     {
       label: 'Quit',
       click: () => {
