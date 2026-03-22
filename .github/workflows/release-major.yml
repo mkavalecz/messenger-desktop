@@ -1,0 +1,14 @@
+name: Major Release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    uses: ./.github/workflows/_release.yml
+    with:
+      version_type: major
+    secrets: inherit

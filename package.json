@@ -12,6 +12,7 @@
     "start": "tsc && concurrently -k \"tsc -w --preserveWatchOutput\" \"electronmon .\"",
     "clean": "rimraf dist out",
     "build": "npm run clean && tsc && electron-builder",
+    "build:ci": "npm run clean && tsc && electron-builder --publish never",
     "lint": "eslint --ext .ts,.tsx .",
     "test": "jest"
   },
