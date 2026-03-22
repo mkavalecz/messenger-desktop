@@ -1,5 +1,5 @@
 import { app } from 'electron';
-import { APP_NAME } from './util/constants';
+import { APP_ID, APP_NAME } from './util/constants';
 import { loadSettings, settings } from './persistence/settings';
 import { createTray, updateBadge } from './tray';
 import { createMainWindow, showWindow, toggleWindow } from './window';
@@ -7,7 +7,7 @@ import { createLogger } from './util/logging';
 import { checkForUpdates } from './util/updater';
 
 app.setName(APP_NAME);
-app.setAppUserModelId(APP_NAME);
+app.setAppUserModelId(APP_ID);
 
 const log = createLogger('main');
 
