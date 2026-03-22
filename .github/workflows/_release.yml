@@ -49,7 +49,7 @@ jobs:
             artifact: linux
           - os: windows-latest
             artifact: windows
-          - os: getmac
+          - os: macos-latest
             artifact: mac
     runs-on: ${{ matrix.os }}
     steps:
