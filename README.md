@@ -31,6 +31,7 @@ npm run build
 
 - System tray integration with close-to-tray and minimize-to-tray as options
 - Start minimized option
+- Check for updates option
 - Unread message badge (red dot) on tray icon
 - Persisted session (stays logged in)
 - Persisted window size/position
