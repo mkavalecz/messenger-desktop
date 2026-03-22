@@ -19,7 +19,7 @@ export default defineConfig([
     ],
     languageOptions: {
       parserOptions: {
-        project: ['./tsconfig.json'],
+        project: ['./tsconfig.eslint.json'],
         tsconfigRootDir: import.meta.dirname
       },
       ecmaVersion: 2020,
@@ -27,6 +27,15 @@ export default defineConfig([
     },
     rules: {
       '@typescript-eslint/restrict-template-expressions': 'off'
+    }
+  },
+  {
+    files: ['src/**/__tests__/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off'
     }
   }
 ]);
