@@ -9,6 +9,8 @@ on:
 jobs:
   bump-version:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     outputs:
       version: ${{ steps.bump.outputs.version }}
     steps:
@@ -37,6 +39,8 @@ jobs:
 
   build:
     needs: bump-version
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -74,6 +78,8 @@ jobs:
   release:
     needs: [bump-version, build]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/download-artifact@v8.0.1
         with:
