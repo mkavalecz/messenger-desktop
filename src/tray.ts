@@ -30,7 +30,7 @@ export function createTray(trayCallbacks: TrayCallbacks): void {
   iconBadge = makeBadgeIcon(iconNormal);
 
   tray = new Tray(iconNormal);
-  tray.setToolTip(app.name);
+  tray.setToolTip(`${app.name} v${app.getVersion()}`);
   tray.setContextMenu(buildMenu());
 
   tray.on('click', () => {
