@@ -36,3 +36,22 @@ npm run build
 - Persisted window size/position
 - Voice and video call support
 - Windows, macOS, and Linux support
+
+## Installation
+
+### Windows
+
+Windows may show a "Windows protected your PC" SmartScreen warning because the app is unsigned.
+
+1. Click **More info**
+2. Click **Run anyway**
+
+### macOS
+
+macOS will block the app on first launch because it is not notarized.
+
+1. Open **Finder** and locate the app
+2. Right-click (or Control-click) the app and select **Open**
+3. Click **Open** in the dialog that appears
+
+After this first launch, you can open the app normally.
