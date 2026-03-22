@@ -5,17 +5,19 @@ import { createLogger } from '../util/logging';
 import { readJsonFile } from './persistence';
 
 export interface Settings {
-  start_minimized: boolean;
   minimize_to_tray: boolean;
   close_to_tray: boolean;
+  start_minimized: boolean;
+  check_for_updates: boolean;
 }
 
 const log = createLogger('settings');
 
 export const settings: Settings = {
-  start_minimized: false,
   minimize_to_tray: true,
-  close_to_tray: true
+  close_to_tray: true,
+  start_minimized: false,
+  check_for_updates: true
 };
 
 export function loadSettings(): void {

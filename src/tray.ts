@@ -73,12 +73,6 @@ function buildMenu(): Menu {
     },
     { type: 'separator' },
     {
-      label: 'Start minimized',
-      type: 'checkbox',
-      checked: settings.start_minimized,
-      click: toggleSetting('start_minimized')
-    },
-    {
       label: 'Minimize to tray',
       type: 'checkbox',
       checked: settings.minimize_to_tray,
@@ -90,6 +84,7 @@ function buildMenu(): Menu {
       checked: settings.close_to_tray,
       click: toggleSetting('close_to_tray')
     },
+    { type: 'separator' },
     {
       label: 'Run on startup',
       type: 'checkbox',
@@ -98,6 +93,18 @@ function buildMenu(): Menu {
         setRunOnStartup(!isRunOnStartup());
         refreshMenu();
       }
+    },
+    {
+      label: 'Start minimized',
+      type: 'checkbox',
+      checked: settings.start_minimized,
+      click: toggleSetting('start_minimized')
+    },
+    {
+      label: 'Check for updates',
+      type: 'checkbox',
+      checked: settings.check_for_updates,
+      click: toggleSetting('check_for_updates')
     },
     { type: 'separator' },
     {

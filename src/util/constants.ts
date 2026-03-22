@@ -3,6 +3,9 @@ import path from 'path';
 export const APP_NAME = 'Messenger Desktop';
 export const MESSENGER_URL = 'https://www.facebook.com/messages';
 export const PARTITION = 'persist:messenger';
+export const GITHUB_REPO = 'mkavalecz/messenger-desktop';
+export const GITHUB_RELEASES_URL = `https://github.com/${GITHUB_REPO}/releases/latest`;
+export const GITHUB_RELEASES_API_URL = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
 export const ICONS_DIR = path.join(__dirname, '..', '..', 'icons');
 export const TRAY_ICON_PATH = path.join(ICONS_DIR, 'tray.png');
 
