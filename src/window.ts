@@ -1,5 +1,6 @@
-import { app, BrowserWindow, Menu, session, shell, WebContents } from 'electron';
+import { app, BrowserWindow, Menu, session, shell } from 'electron';
 import { getWindowIcon, MESSENGER_URL, PARTITION, PLATFORM } from './util/constants';
+import { isAllowedHost, setupNavigationGuard } from './util/navigation';
 import { settings } from './persistence/settings';
 import { loadWindowState, saveBounds, saveWindowState, windowState } from './persistence/windowState';
 import { createLogger } from './util/logging';
@@ -69,11 +70,7 @@ export function createMainWindow(appCallbacks: AppCallbacks): void {
     }
   });
 
-  // Hide the window-level menu bar on Windows/Linux; on macOS the global app
-  // menu is handled separately above and this call has no effect.
-  mainWindow.setMenuBarVisibility(false);
-
-  setupWebContents(mainWindow.webContents, appCallbacks.onTitleUpdate);
+  setupWindow(mainWindow, appCallbacks.onTitleUpdate);
   setupWindowEvents(mainWindow, appCallbacks.isQuitting);
   setupBoundsTracking(mainWindow);
 
@@ -91,32 +88,36 @@ export function createMainWindow(appCallbacks: AppCallbacks): void {
   }
 }
 
-// Configures permissions, navigation restrictions, and title updates for the
-// web contents hosting the Messenger page.
-function setupWebContents(webContents: WebContents, onTitleUpdate: (title: string) => void): void {
+// Configures menu, permissions, navigation restrictions, and title updates for the window
+function setupWindow(browserWindow: BrowserWindow, onTitleUpdate: (title: string) => void): void {
   session.fromPartition(PARTITION).setPermissionRequestHandler((_wc, permission, callback) => {
     log.info('Permission request:', permission);
     callback(true);
   });
 
-  webContents.on('will-navigate', (e, url) => {
-    if (!isAllowedHost(url)) {
-      log.info('Redirecting external navigation to system browser:', url);
-      e.preventDefault();
-      void shell.openExternal(url);
-    }
-  });
+  browserWindow.setMenuBarVisibility(false);
+  setupNavigationGuard(browserWindow);
 
-  webContents.setWindowOpenHandler(({ url }) => {
-    if (url === 'about:blank' || isAllowedHost(url)) {
-      return { action: 'allow' };
+  browserWindow.webContents.setWindowOpenHandler(({ url }) => {
+    if (isAllowedHost(url)) {
+      return { action: 'allow', overrideBrowserWindowOptions: { show: false } };
     }
     log.info('Redirecting external popup to system browser:', url);
     void shell.openExternal(url);
     return { action: 'deny' };
   });
 
-  webContents.on('page-title-updated', (_e, title) => {
+  browserWindow.webContents.on('did-create-window', (popupWindow) => {
+    popupWindow.setMenuBarVisibility(false);
+    setupNavigationGuard(popupWindow);
+    popupWindow.webContents.on('did-navigate', (_e, url) => {
+      if (isAllowedHost(url)) {
+        popupWindow.show();
+      }
+    });
+  });
+
+  browserWindow.webContents.on('page-title-updated', (_e, title) => {
     onTitleUpdate(title);
   });
 }
@@ -178,21 +179,6 @@ function setupBoundsTracking(browserWindow: BrowserWindow): void {
     browserWindow.on('moved', () => {
       saveBounds(browserWindow);
     });
-  }
-}
-
-// Returns true if the URL belongs to a Facebook or Messenger domain.
-function isAllowedHost(url: string): boolean {
-  try {
-    const { hostname } = new URL(url);
-    return (
-      hostname === 'facebook.com' ||
-      hostname.endsWith('.facebook.com') ||
-      hostname === 'messenger.com' ||
-      hostname.endsWith('.messenger.com')
-    );
-  } catch {
-    return false;
   }
 }
 
