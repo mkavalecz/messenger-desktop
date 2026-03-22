@@ -4,6 +4,9 @@ import { createLogger } from './logging';
 
 const log = createLogger('updater');
 
+// Held at module scope to prevent garbage collection before the notification renders.
+let updateNotification: Notification | null = null;
+
 export async function checkForUpdates(): Promise<void> {
   try {
     log.info('Checking for updates');
@@ -28,14 +31,18 @@ export async function checkForUpdates(): Promise<void> {
 }
 
 function showUpdateNotification(version: string): void {
-  const notification = new Notification({
-    title: 'Update available',
-    body: `Version ${version} is available — click here to download`
+  if (!Notification.isSupported()) {
+    log.warn('Notifications are not supported on this platform');
+    return;
+  }
+  updateNotification = new Notification({
+    title: `Version ${version} is available`,
+    body: 'Click here to download'
   });
-  notification.on('click', () => {
+  updateNotification.on('click', () => {
     void shell.openExternal(GITHUB_RELEASES_URL);
   });
-  notification.show();
+  updateNotification.show();
 }
 
 function isNewerVersion(latestVersion: string, currentVersion: string): boolean {

@@ -7,6 +7,7 @@ import { createLogger } from './util/logging';
 import { checkForUpdates } from './util/updater';
 
 app.setName(APP_NAME);
+app.setAppUserModelId(APP_NAME);
 
 const log = createLogger('main');
 
