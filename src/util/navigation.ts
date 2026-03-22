@@ -24,6 +24,10 @@ export function setupNavigationGuard(browserWindow?: BrowserWindow): void {
 // navigates to an external destination.
 export function isAllowedHost(url: string): boolean {
   try {
+    // needed for calls to work
+    if (url === 'about:blank') {
+      return true;
+    }
     const { hostname } = new URL(url);
     return (
       hostname === 'facebook.com' ||
