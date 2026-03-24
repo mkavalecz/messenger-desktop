@@ -52,8 +52,10 @@ Windows may show a "Windows protected your PC" SmartScreen warning because the a
 
 macOS will block the app on first launch because it is not notarized.
 
-1. Open **Finder** and locate the app
-2. Right-click (or Control-click) the app and select **Open**
-3. Click **Open** in the dialog that appears
+1. Run the DMG file and move the app to the Applications folder
+2. Start the application from the Applications folder
+3. The application will not start until it is allowed in the System Settings --> Privacy & Security
+4. After allowing the application to run on the system start the application again
+5. On the first launch (or after an update) allow microphone and camera access
 
 After this first launch, you can open the app normally.
