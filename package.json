@@ -33,7 +33,9 @@
     },
     "mac": {
       "icon": "icons/icon.icns",
-      "target": "dmg"
+      "target": "dmg",
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist"
     },
     "linux": {
       "icon": "icons/icon.png",

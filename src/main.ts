@@ -1,4 +1,4 @@
-import { app } from 'electron';
+import { app, systemPreferences } from 'electron';
 import { APP_ID, APP_NAME } from './util/constants';
 import { loadSettings, settings } from './persistence/settings';
 import { createTray, updateBadge } from './tray';
@@ -22,8 +22,13 @@ if (!app.requestSingleInstanceLock()) {
     showWindow();
   });
 
-  void app.whenReady().then(() => {
+  void app.whenReady().then(async () => {
     log.info('App ready, starting up');
+
+    if (process.platform === 'darwin') {
+      await systemPreferences.askForMediaAccess('camera');
+      await systemPreferences.askForMediaAccess('microphone');
+    }
 
     loadSettings();
 
