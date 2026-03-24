@@ -50,6 +50,10 @@ export function updateBadge(title: string): void {
       log.info('Badge on');
       hasBadge = true;
       tray!.setImage(iconBadge!);
+      // Update dock badge on macOS
+      if (process.platform === 'darwin' && app.dock) {
+        app.dock.setBadge('●');
+      }
     }
   } else if (hasBadge && badgeTimer === null) {
     badgeTimer = setTimeout(() => {
@@ -57,6 +61,10 @@ export function updateBadge(title: string): void {
       badgeTimer = null;
       hasBadge = false;
       tray!.setImage(iconNormal!);
+      // Clear dock badge on macOS
+      if (process.platform === 'darwin' && app.dock) {
+        app.dock.setBadge('');
+      }
     }, BADGE_CLEAR_DELAY_MS);
   }
 }
