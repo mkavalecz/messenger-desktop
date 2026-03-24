@@ -1,6 +1,6 @@
 import type { MenuItemConstructorOptions, NativeImage } from 'electron';
 import { app, Menu, Tray } from 'electron';
-import { BADGE_CLEAR_DELAY_MS, getTrayIcon } from './util/constants';
+import { BADGE_CLEAR_DELAY_MS, getTrayIcon, PLATFORM } from './util/constants';
 import { showAboutWindow } from './about';
 import { saveSettings, settings } from './persistence/settings';
 import { isRunOnStartup, setRunOnStartup } from './util/startup';
@@ -25,8 +25,9 @@ export function createTray(trayCallbacks: TrayCallbacks): void {
   callbacks = trayCallbacks;
 
   iconNormal = getTrayIcon(false);
-  iconBadge = getTrayIcon(true);
-
+  if (PLATFORM !== 'darwin') {
+    iconBadge = getTrayIcon(true);
+  }
   tray = new Tray(iconNormal);
   tray.setToolTip(`${app.name} v${app.getVersion()}`);
   tray.setContextMenu(buildMenu());
@@ -47,25 +48,33 @@ export function updateBadge(title: string): void {
       badgeTimer = null;
     }
     if (!hasBadge) {
-      log.info('Badge on');
-      hasBadge = true;
-      tray!.setImage(iconBadge!);
-      // Update dock badge on macOS
-      if (process.platform === 'darwin' && app.dock) {
-        app.dock.setBadge('●');
-      }
+      showBadge(true);
     }
   } else if (hasBadge && badgeTimer === null) {
     badgeTimer = setTimeout(() => {
-      log.info('Badge off');
       badgeTimer = null;
-      hasBadge = false;
-      tray!.setImage(iconNormal!);
-      // Clear dock badge on macOS
-      if (process.platform === 'darwin' && app.dock) {
-        app.dock.setBadge('');
-      }
+      showBadge(false);
     }, BADGE_CLEAR_DELAY_MS);
+  }
+}
+
+function showBadge(show: boolean) {
+  if (show) {
+    log.info('Badge on');
+    hasBadge = true;
+    if (PLATFORM === 'darwin') {
+      app.dock?.setBadge('●');
+    } else {
+      tray!.setImage(iconBadge!);
+    }
+  } else {
+    log.info('Badge off');
+    hasBadge = false;
+    if (PLATFORM === 'darwin') {
+      app.dock?.setBadge('');
+    } else {
+      tray!.setImage(iconNormal!);
+    }
   }
 }
 
