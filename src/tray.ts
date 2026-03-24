@@ -1,10 +1,9 @@
 import type { MenuItemConstructorOptions, NativeImage } from 'electron';
-import { app, Menu, nativeImage, Tray } from 'electron';
-import { TRAY_ICON_PATH } from './util/constants';
+import { app, Menu, Tray } from 'electron';
+import { BADGE_CLEAR_DELAY_MS, getTrayIcon } from './util/constants';
 import { showAboutWindow } from './about';
 import { saveSettings, settings } from './persistence/settings';
 import { isRunOnStartup, setRunOnStartup } from './util/startup';
-import { makeBadgeIcon } from './util/badge';
 import { createLogger } from './util/logging';
 
 export interface TrayCallbacks {
@@ -13,8 +12,6 @@ export interface TrayCallbacks {
 }
 
 const log = createLogger('tray');
-
-const BADGE_CLEAR_DELAY_MS = 1500;
 
 let tray: Tray | null = null;
 let iconNormal: NativeImage | null = null;
@@ -27,8 +24,8 @@ export function createTray(trayCallbacks: TrayCallbacks): void {
   log.info('Creating tray');
   callbacks = trayCallbacks;
 
-  iconNormal = nativeImage.createFromPath(TRAY_ICON_PATH);
-  iconBadge = makeBadgeIcon(iconNormal);
+  iconNormal = getTrayIcon(false);
+  iconBadge = getTrayIcon(true);
 
   tray = new Tray(iconNormal);
   tray.setToolTip(`${app.name} v${app.getVersion()}`);

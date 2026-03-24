@@ -1,5 +1,5 @@
 import { app, net, Notification, shell } from 'electron';
-import { GITHUB_RELEASES_API_URL, GITHUB_RELEASES_URL } from './constants';
+import { GITHUB_RELEASES_API_URL, GITHUB_RELEASES_URL, PLATFORM, UPDATE_CHECK_DELAY_MS } from './constants';
 import { createLogger } from './logging';
 
 const log = createLogger('updater');
@@ -8,6 +8,7 @@ const log = createLogger('updater');
 let updateNotification: Notification | null = null;
 
 export async function checkForUpdates(): Promise<void> {
+  await new Promise((resolve) => setTimeout(resolve, UPDATE_CHECK_DELAY_MS));
   try {
     log.info('Checking for updates');
     const response = await net.fetch(GITHUB_RELEASES_API_URL);
@@ -35,9 +36,19 @@ function showUpdateNotification(version: string): void {
     log.warn('Notifications are not supported on this platform');
     return;
   }
+  log.info('Showing update notification');
   updateNotification = new Notification({
     title: `Version ${version} is available`,
     body: 'Click here to download'
+  });
+  updateNotification.on('show', () => {
+    log.info('Update notification shown');
+  });
+  updateNotification.on('failed', (_event, error) => {
+    log.warn('Update notification failed:', error);
+    if (PLATFORM === 'darwin') {
+      log.warn('Check System Settings > Notifications > Messenger Desktop');
+    }
   });
   updateNotification.on('click', () => {
     void shell.openExternal(GITHUB_RELEASES_URL);

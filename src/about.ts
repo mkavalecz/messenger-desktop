@@ -1,11 +1,8 @@
-import path from 'path';
 import { app, BrowserWindow, shell } from 'electron';
-import { APP_NAME } from './util/constants';
+import { ABOUT_HTML_PATH, APP_NAME } from './util/constants';
 import { createLogger } from './util/logging';
 
 const log = createLogger('about');
-
-const ABOUT_HTML_PATH = path.join(__dirname, '..', 'assets', 'about.html');
 
 let aboutWindow: BrowserWindow | null = null;
 

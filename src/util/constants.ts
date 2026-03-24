@@ -1,10 +1,17 @@
 import path from 'path';
+import { nativeImage } from 'electron';
+
+// noinspection JSDeprecatedSymbols
+export const PLATFORM = process.platform;
 
 export const APP_NAME = 'Messenger Desktop';
 export const APP_ID = 'io.github.mkavalecz.messenger-desktop';
 
 export const MESSENGER_URL = 'https://www.facebook.com/messages';
 export const PARTITION = 'persist:messenger';
+
+export const BADGE_CLEAR_DELAY_MS = 2000;
+export const UPDATE_CHECK_DELAY_MS = 10_000;
 
 export const LOG_ROTATION_SIZE_BYTES = 300 * 1024;
 export const LOG_ROTATION_MAX_FILES = 4;
@@ -14,10 +21,7 @@ export const GITHUB_RELEASES_URL = `https://github.com/${GITHUB_REPO}/releases/l
 export const GITHUB_RELEASES_API_URL = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
 
 export const ICONS_DIR = path.join(__dirname, '..', '..', 'icons');
-export const TRAY_ICON_PATH = path.join(ICONS_DIR, 'tray.png');
-
-// noinspection JSDeprecatedSymbols
-export const PLATFORM = process.platform;
+export const ABOUT_HTML_PATH = path.join(__dirname, '..', '..', 'assets', 'about.html');
 
 export function getWindowIcon(): string {
   if (PLATFORM === 'win32') {
@@ -27,4 +31,13 @@ export function getWindowIcon(): string {
     return path.join(ICONS_DIR, 'icon.icns');
   }
   return path.join(ICONS_DIR, 'icon.png');
+}
+
+export function getTrayIcon(isBadge: boolean): Electron.NativeImage {
+  let trayIconPath: string = path.join(ICONS_DIR, 'tray');
+  if (PLATFORM === 'darwin') {
+    trayIconPath = path.join(trayIconPath, 'mac');
+  }
+
+  return nativeImage.createFromPath(path.join(trayIconPath, isBadge ? 'badge.png' : 'normal.png'));
 }
