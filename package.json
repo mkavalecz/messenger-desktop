@@ -1,6 +1,6 @@
 {
   "name": "messenger-desktop",
-  "version": "0.4.5",
+  "version": "0.4.6",
   "description": "A lightweight desktop wrapper for Facebook Messenger built with Electron.",
   "main": "out/main.js",
   "license": "MIT",
