@@ -21,6 +21,7 @@ export const GITHUB_RELEASES_URL = `https://github.com/${GITHUB_REPO}/releases/l
 export const GITHUB_RELEASES_API_URL = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
 
 export const ICONS_DIR = path.join(__dirname, '..', '..', 'icons');
+export const TRAY_ICON_DIR = path.join(ICONS_DIR, 'tray');
 export const ABOUT_HTML_PATH = path.join(__dirname, '..', '..', 'assets', 'about.html');
 
 export function getWindowIcon(): string {
@@ -34,10 +35,12 @@ export function getWindowIcon(): string {
 }
 
 export function getTrayIcon(isBadge: boolean): Electron.NativeImage {
-  let trayIconPath: string = path.join(ICONS_DIR, 'tray');
   if (PLATFORM === 'darwin') {
-    trayIconPath = path.join(trayIconPath, 'mac');
+    if (isBadge) {
+      throw new Error('Badge icons are not supported on macOS');
+    }
+    return nativeImage.createFromPath(path.join(TRAY_ICON_DIR, 'mac.png'));
   }
 
-  return nativeImage.createFromPath(path.join(trayIconPath, isBadge ? 'badge.png' : 'normal.png'));
+  return nativeImage.createFromPath(path.join(TRAY_ICON_DIR, isBadge ? 'badge.png' : 'normal.png'));
 }
