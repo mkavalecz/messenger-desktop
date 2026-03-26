@@ -42,7 +42,6 @@ function showMessageNotification(): void {
 
   messageNotification.on('click', () => {
     showWindow();
-    app.focus();
   });
 
   messageNotification.show();
