@@ -25,7 +25,6 @@ if (!app.requestSingleInstanceLock()) {
   void app.whenReady().then(async () => {
     log.info('App ready, starting up');
 
-
     if (process.platform === 'darwin') {
       await systemPreferences.askForMediaAccess('camera');
       await systemPreferences.askForMediaAccess('microphone');
