@@ -18,12 +18,13 @@ export interface AppCallbacks {
 const log = createLogger('window');
 
 let mainWindow: BrowserWindow | null = null;
-let hasRegisteredAppMenuRefresh = false;
+let hasRegisteredMacMenuRefresh = false;
 
 export function showWindow(): void {
   if (!mainWindow || mainWindow.isDestroyed()) {
     return;
   }
+  showDockIcon();
   if (mainWindow.isMinimized()) {
     mainWindow.restore();
   }
@@ -41,6 +42,7 @@ export function toggleWindow(): void {
   }
   if (mainWindow.isVisible() && !mainWindow.isMinimized()) {
     mainWindow.hide();
+    hideDockIcon();
   } else {
     showWindow();
   }
@@ -51,10 +53,14 @@ export function createMainWindow(appCallbacks: AppCallbacks): void {
 
   log.info('Creating main window in', `${windowState.width}x${windowState.height}`);
 
-  setupApplicationMenu();
-  if (!hasRegisteredAppMenuRefresh) {
-    registerMenuRefreshListener(setupApplicationMenu);
-    hasRegisteredAppMenuRefresh = true;
+  if (PLATFORM === 'darwin') {
+    setupMacApplicationMenu();
+    if (!hasRegisteredMacMenuRefresh) {
+      registerMenuRefreshListener(setupMacApplicationMenu);
+      hasRegisteredMacMenuRefresh = true;
+    }
+  } else {
+    Menu.setApplicationMenu(null);
   }
 
   mainWindow = new BrowserWindow({
@@ -86,8 +92,10 @@ export function createMainWindow(appCallbacks: AppCallbacks): void {
       mainWindow.maximize();
     }
     mainWindow.show();
+    showDockIcon();
     log.info('Window shown');
   } else {
+    hideDockIcon();
     log.info('Start minimized, window hidden');
   }
 }
@@ -99,12 +107,8 @@ function setupWindow(browserWindow: BrowserWindow, onTitleUpdate: (title: string
     callback(true);
   });
 
-  if (PLATFORM === 'darwin') {
-    browserWindow.setMenuBarVisibility(false);
-  } else {
-    browserWindow.setAutoHideMenuBar(false);
-    browserWindow.setMenuBarVisibility(true);
-  }
+  browserWindow.setAutoHideMenuBar(true);
+  browserWindow.setMenuBarVisibility(false);
   setupNavigationGuard(browserWindow, true);
 
   browserWindow.webContents.setWindowOpenHandler(({ url }) => {
@@ -140,6 +144,7 @@ function setupWindowEvents(browserWindow: BrowserWindow, isQuitting: () => boole
       log.info('Close intercepted, hiding to tray');
       e.preventDefault();
       browserWindow.hide();
+      hideDockIcon();
     } else {
       log.info('Closing window, saving state');
       saveBounds(browserWindow);
@@ -154,8 +159,25 @@ function setupWindowEvents(browserWindow: BrowserWindow, isQuitting: () => boole
     if (settings.show_tray_icon && settings.minimize_to_tray) {
       log.info('Minimize intercepted, hiding to tray');
       browserWindow.hide();
+      hideDockIcon();
     }
   });
+}
+
+function showDockIcon(): void {
+  if (PLATFORM !== 'darwin') {
+    return;
+  }
+
+  void app.dock?.show();
+}
+
+function hideDockIcon(): void {
+  if (PLATFORM !== 'darwin' || !settings.show_tray_icon) {
+    return;
+  }
+
+  app.dock?.hide();
 }
 
 // Tracks window size and position for persistence across restarts.
@@ -193,9 +215,9 @@ function setupBoundsTracking(browserWindow: BrowserWindow): void {
   }
 }
 
-// On macOS this becomes the global app menu. On Windows/Linux it appears in the
-// window menu bar so the Settings items remain accessible even without a tray icon.
-function setupApplicationMenu(): void {
+// On macOS the global app menu lives outside any window. Keep the custom
+// Settings menu there while Windows/Linux continue to use only the tray menu.
+function setupMacApplicationMenu(): void {
   const template = [] as Electron.MenuItemConstructorOptions[];
   const appSubmenu: Electron.MenuItemConstructorOptions[] = [
     {
@@ -211,19 +233,9 @@ function setupApplicationMenu(): void {
     submenu: appSubmenu
   };
 
-  if (PLATFORM === 'darwin') {
-    appSubmenu.push(
-      { type: 'separator' },
-      { role: 'hide' },
-      { role: 'hideOthers' },
-      { role: 'unhide' }
-    );
-  }
+  appSubmenu.push({ type: 'separator' }, { role: 'hide' }, { role: 'hideOthers' }, { role: 'unhide' });
 
-  appSubmenu.push(
-    { type: 'separator' },
-    { role: 'quit' }
-  );
+  appSubmenu.push({ type: 'separator' }, { role: 'quit' });
 
   template.push(appMenu);
 

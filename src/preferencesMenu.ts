@@ -3,6 +3,7 @@ import { saveSettings, settings } from './persistence/settings';
 import { refreshMenus } from './menuRefresh';
 import { PLATFORM } from './util/constants';
 import { isRunOnStartup, setRunOnStartup } from './util/startup';
+import { checkForUpdates } from './util/updater';
 
 export function buildPreferenceMenuItems(): MenuItemConstructorOptions[] {
   return [
@@ -48,10 +49,16 @@ export function buildPreferenceMenuItems(): MenuItemConstructorOptions[] {
       click: toggleSetting('start_minimized')
     },
     {
-      label: 'Check for updates',
+      label: 'Automatically check for updates',
       type: 'checkbox',
       checked: settings.check_for_updates,
       click: toggleSetting('check_for_updates')
+    },
+    {
+      label: 'Check for updates now',
+      click: () => {
+        void checkForUpdates({ interactive: true });
+      }
     }
   ];
 }

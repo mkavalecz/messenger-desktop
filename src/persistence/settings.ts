@@ -37,6 +37,7 @@ export function loadSettings(): void {
     saveSettings();
   } else {
     Object.assign(settings, result.data);
+    normalizeSettings();
     log.info('Loaded successfully');
   }
 }
@@ -44,11 +45,18 @@ export function loadSettings(): void {
 export function saveSettings(): void {
   const filePath = settingsPath();
   try {
+    normalizeSettings();
     log.info('Saving to', filePath);
     fs.writeFileSync(filePath, JSON.stringify(settings, null, 2));
     log.info('Saved successfully');
   } catch (e) {
     log.error('Failed to save:', e instanceof Error ? e.message : e);
+  }
+}
+
+function normalizeSettings(): void {
+  if (settings.minimize_to_tray || settings.close_to_tray) {
+    settings.show_tray_icon = true;
   }
 }
 
