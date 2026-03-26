@@ -62,6 +62,7 @@ function showMessageNotification(onShowWindow: () => void): void {
   }
   if (!Notification.isSupported()) {
     log.warn('Notifications are not supported on this platform');
+    return;
   }
   messageNotification?.removeAllListeners();
   messageNotification = new Notification({

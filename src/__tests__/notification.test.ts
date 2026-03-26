@@ -4,8 +4,10 @@ import type { BrowserWindow } from 'electron';
 type MockWindowInstance = EventEmitter & {
   currentTitle: string;
   focused: boolean;
+  visible: boolean;
   webContents: EventEmitter;
   isFocused: jest.Mock<boolean, []>;
+  isVisible: jest.Mock<boolean, []>;
   getTitle: jest.Mock<string, []>;
 };
 
@@ -34,8 +36,15 @@ describe('notifications', () => {
       });
       (NotificationMock as unknown as { isSupported: () => boolean }).isSupported = () => true;
 
-      return { Notification: NotificationMock };
+      return {
+        Notification: NotificationMock,
+        app: { getName: () => 'Messenger Desktop' }
+      };
     });
+
+    jest.doMock('../util/constants', () => ({
+      PLATFORM: 'darwin'
+    }));
 
     jest.doMock('../persistence/settings', () => ({
       settings: { show_notifications: true }
@@ -50,11 +59,14 @@ describe('notifications', () => {
     const instance = Object.assign(new EventEmitter(), {
       currentTitle: '',
       focused: false,
+      visible: true,
       webContents: new EventEmitter(),
       isFocused: jest.fn<boolean, []>(),
+      isVisible: jest.fn<boolean, []>(),
       getTitle: jest.fn<string, []>()
     }) as MockWindowInstance;
     instance.isFocused.mockImplementation(() => instance.focused);
+    instance.isVisible.mockImplementation(() => instance.visible);
     instance.getTitle.mockImplementation(() => instance.currentTitle);
     return instance;
   }
