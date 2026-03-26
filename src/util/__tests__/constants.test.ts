@@ -33,7 +33,6 @@ describe('getWindowIcon', () => {
 
   function loadWithPlatform(platform: string) {
     Object.defineProperty(process, 'platform', { value: platform });
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     return require('../constants') as typeof import('../constants');
   }
 });
@@ -84,7 +83,6 @@ describe('getTrayIcon', () => {
 
   function loadWithPlatform(platform: string) {
     Object.defineProperty(process, 'platform', { value: platform });
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     return require('../constants') as typeof import('../constants');
   }
 });

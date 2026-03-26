@@ -30,7 +30,8 @@ npm run build
 ## Features
 
 - System tray integration with close-to-tray and minimize-to-tray as options
-- Unread message badge (red dot) on tray icon (with sound notification)
+- Unread message badge (red dot) on tray icon
+- Notifications for new messages
 - Start minimized option
 - Check for updates option
 - Open links in your default browser

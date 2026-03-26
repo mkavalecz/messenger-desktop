@@ -4,6 +4,7 @@ import { isAllowedHost, setupNavigationGuard } from './util/navigation';
 import { settings } from './persistence/settings';
 import { loadWindowState, saveBounds, saveWindowState, windowState } from './persistence/windowState';
 import { createLogger } from './util/logging';
+import { resetNotificationLock, setupWindowNotifications } from './notification';
 
 export interface AppCallbacks {
   isQuitting: () => boolean;
@@ -32,6 +33,7 @@ export function showWindow(): void {
   }
   mainWindow.show();
   mainWindow.focus();
+  resetNotificationLock(mainWindow.getTitle());
 }
 
 export function toggleWindow(): void {
@@ -88,7 +90,7 @@ export function createMainWindow(appCallbacks: AppCallbacks): void {
   }
 }
 
-// Configures menu, permissions, navigation restrictions, and title updates for the window
+// Configures menu, permissions, navigation restrictions, and notifications for the window
 function setupWindow(browserWindow: BrowserWindow, onTitleUpdate: (title: string) => void): void {
   session.fromPartition(PARTITION).setPermissionRequestHandler((_wc, permission, callback) => {
     log.info('Permission request:', permission);
@@ -120,6 +122,8 @@ function setupWindow(browserWindow: BrowserWindow, onTitleUpdate: (title: string
   browserWindow.webContents.on('page-title-updated', (_e, title) => {
     onTitleUpdate(title);
   });
+
+  setupWindowNotifications(browserWindow, showWindow);
 }
 
 // Wires up close and minimize events to respect tray settings.
