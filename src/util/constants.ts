@@ -6,10 +6,11 @@ export const PLATFORM = process.platform;
 
 export const APP_NAME = 'Messenger Desktop';
 export const APP_ID = 'io.github.mkavalecz.messenger-desktop';
+export const PARTITION = 'persist:messenger';
 
 export const MESSENGER_URL = 'https://www.facebook.com/messages';
 export const CALL_URL = 'https://www.facebook.com/groupcall';
-export const PARTITION = 'persist:messenger';
+export const INTERNAL_URL_RULES = [{ url: 'about:blank', fullMatch: true }, { url: MESSENGER_URL }, { url: CALL_URL }];
 
 export const BADGE_CLEAR_DELAY_MS = 2000;
 export const UPDATE_CHECK_DELAY_MS = 10_000;

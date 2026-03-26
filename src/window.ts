@@ -1,6 +1,7 @@
+import path from 'path';
 import { app, BrowserWindow, Menu, session, shell } from 'electron';
 import { getWindowIcon, MESSENGER_URL, PARTITION, PLATFORM } from './util/constants';
-import { isAllowedHost, setupNavigationGuard } from './util/navigation';
+import { isInternalUrl, setupNavigationGuard } from './util/navigation';
 import { settings } from './persistence/settings';
 import { loadWindowState, saveBounds, saveWindowState, windowState } from './persistence/windowState';
 import { createLogger } from './util/logging';
@@ -68,6 +69,7 @@ export function createMainWindow(appCallbacks: AppCallbacks): void {
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
+      preload: path.join(__dirname, 'preload.js'),
       session: session.fromPartition(PARTITION)
     }
   });
@@ -98,10 +100,10 @@ function setupWindow(browserWindow: BrowserWindow, onTitleUpdate: (title: string
   });
 
   browserWindow.setMenuBarVisibility(false);
-  setupNavigationGuard(browserWindow, false);
+  setupNavigationGuard(browserWindow, true);
 
   browserWindow.webContents.setWindowOpenHandler(({ url }) => {
-    if (isAllowedHost(url)) {
+    if (isInternalUrl(url)) {
       return { action: 'allow', overrideBrowserWindowOptions: { show: false } };
     }
     log.info('Redirecting external popup to system browser:', url);
@@ -111,9 +113,9 @@ function setupWindow(browserWindow: BrowserWindow, onTitleUpdate: (title: string
 
   browserWindow.webContents.on('did-create-window', (popupWindow) => {
     popupWindow.setMenuBarVisibility(false);
-    setupNavigationGuard(popupWindow, true);
+    setupNavigationGuard(popupWindow, false);
     popupWindow.webContents.on('did-navigate', (_e, url) => {
-      if (isAllowedHost(url)) {
+      if (isInternalUrl(url)) {
         popupWindow.show();
       }
     });
