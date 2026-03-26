@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu, session, shell } from 'electron';
+import { app, BrowserWindow, Menu, Notification, session, shell } from 'electron';
 import { getWindowIcon, MESSENGER_URL, PARTITION, PLATFORM } from './util/constants';
 import { isAllowedHost, setupNavigationGuard } from './util/navigation';
 import { settings } from './persistence/settings';
@@ -19,6 +19,41 @@ if (PLATFORM !== 'darwin') {
 }
 
 let mainWindow: BrowserWindow | null = null;
+let lastUnreadCount = 0;
+let messageNotification: Notification | null = null;
+let hasUnreadStateInitialized = false;
+let notificationLockedUntilFocus = false;
+
+function parseUnreadCount(title: string): number {
+  const match = title.match(/^\((\d+)\)/);
+  return match ? parseInt(match[1], 10) : 0;
+}
+
+function showMessageNotification(): void {
+  if (PLATFORM !== 'darwin' || !Notification.isSupported()) {
+    return;
+  }
+
+  messageNotification?.removeAllListeners();
+  messageNotification = new Notification({
+    title: 'Messenger Desktop',
+    body: 'New message arrived'
+  });
+
+  messageNotification.on('click', () => {
+    showWindow();
+    app.focus();
+  });
+
+  messageNotification.show();
+}
+
+function resetNotificationLock(): void {
+  notificationLockedUntilFocus = false;
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    lastUnreadCount = parseUnreadCount(mainWindow.getTitle());
+  }
+}
 
 export function showWindow(): void {
   if (!mainWindow || mainWindow.isDestroyed()) {
@@ -32,6 +67,7 @@ export function showWindow(): void {
   }
   mainWindow.show();
   mainWindow.focus();
+  resetNotificationLock();
 }
 
 export function toggleWindow(): void {
@@ -119,6 +155,39 @@ function setupWindow(browserWindow: BrowserWindow, onTitleUpdate: (title: string
 
   browserWindow.webContents.on('page-title-updated', (_e, title) => {
     onTitleUpdate(title);
+    const unreadCount = parseUnreadCount(title);
+
+    if (!hasUnreadStateInitialized) {
+      hasUnreadStateInitialized = true;
+      lastUnreadCount = unreadCount;
+      return;
+    }
+
+    if (browserWindow.isFocused()) {
+      lastUnreadCount = unreadCount;
+      notificationLockedUntilFocus = false;
+      return;
+    }
+
+    if (notificationLockedUntilFocus) {
+      lastUnreadCount = unreadCount;
+      return;
+    }
+
+    const unreadCountIncreased = unreadCount > lastUnreadCount;
+    const shouldNotify = unreadCountIncreased;
+
+    if (shouldNotify) {
+      showMessageNotification();
+      notificationLockedUntilFocus = true;
+    }
+
+    lastUnreadCount = unreadCount;
+  });
+
+  browserWindow.on('focus', () => {
+    notificationLockedUntilFocus = false;
+    lastUnreadCount = parseUnreadCount(browserWindow.getTitle());
   });
 }
 

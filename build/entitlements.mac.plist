@@ -14,5 +14,7 @@
     <true/>
     <key>com.apple.security.automation</key>
     <true/>
+    <key>com.apple.security.notifications</key>
+    <true/>
   </dict>
 </plist>
