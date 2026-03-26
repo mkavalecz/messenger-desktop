@@ -2,8 +2,9 @@ import type { MenuItemConstructorOptions, NativeImage } from 'electron';
 import { app, Menu, Tray } from 'electron';
 import { BADGE_CLEAR_DELAY_MS, getTrayIcon, PLATFORM } from './util/constants';
 import { showAboutWindow } from './about';
-import { saveSettings, settings } from './persistence/settings';
-import { isRunOnStartup, setRunOnStartup } from './util/startup';
+import { registerMenuRefreshListener } from './menuRefresh';
+import { settings } from './persistence/settings';
+import { buildPreferenceMenuItems } from './preferencesMenu';
 import { createLogger } from './util/logging';
 
 export interface TrayCallbacks {
@@ -19,24 +20,48 @@ let iconBadge: NativeImage | null = null;
 let hasBadge = false;
 let badgeTimer: NodeJS.Timeout | null = null;
 let callbacks: TrayCallbacks | null = null;
+let hasRegisteredMenuRefreshListener = false;
 
 export function createTray(trayCallbacks: TrayCallbacks): void {
-  log.info('Creating tray');
+  log.info('Initializing tray');
   callbacks = trayCallbacks;
 
-  iconNormal = getTrayIcon(false);
-  if (PLATFORM !== 'darwin') {
+  if (iconNormal === null) {
+    iconNormal = getTrayIcon(false);
+  }
+  if (PLATFORM !== 'darwin' && iconBadge === null) {
     iconBadge = getTrayIcon(true);
   }
-  tray = new Tray(iconNormal);
-  tray.setToolTip(`${app.name} v${app.getVersion()}`);
+  if (!hasRegisteredMenuRefreshListener) {
+    registerMenuRefreshListener(syncTray);
+    hasRegisteredMenuRefreshListener = true;
+  }
+
+  syncTray();
+
+  log.info('Tray initialized');
+}
+
+function syncTray(): void {
+  if (!settings.show_tray_icon) {
+    if (tray !== null) {
+      log.info('Removing tray');
+      tray.destroy();
+      tray = null;
+    }
+    return;
+  }
+
+  if (tray === null) {
+    log.info('Creating tray');
+    tray = new Tray(iconNormal!);
+    tray.setToolTip(`${app.name} v${app.getVersion()}`);
+    tray.on('click', () => {
+      callbacks!.toggleWindow();
+    });
+  }
+
   tray.setContextMenu(buildMenu());
-
-  tray.on('click', () => {
-    callbacks!.toggleWindow();
-  });
-
-  log.info('Tray created');
 }
 
 export function updateBadge(title: string): void {
@@ -87,47 +112,7 @@ function buildMenu(): Menu {
       }
     },
     { type: 'separator' },
-    {
-      label: 'Show notifications',
-      type: 'checkbox',
-      checked: settings.show_notifications,
-      click: toggleSetting('show_notifications')
-    },
-    { type: 'separator' },
-    {
-      label: 'Minimize to tray',
-      type: 'checkbox',
-      checked: settings.minimize_to_tray,
-      click: toggleSetting('minimize_to_tray')
-    },
-    {
-      label: 'Close to tray',
-      type: 'checkbox',
-      checked: settings.close_to_tray,
-      click: toggleSetting('close_to_tray')
-    },
-    { type: 'separator' },
-    {
-      label: 'Run on startup',
-      type: 'checkbox',
-      checked: isRunOnStartup(),
-      click: () => {
-        setRunOnStartup(!isRunOnStartup());
-        refreshMenu();
-      }
-    },
-    {
-      label: 'Start minimized',
-      type: 'checkbox',
-      checked: settings.start_minimized,
-      click: toggleSetting('start_minimized')
-    },
-    {
-      label: 'Check for updates',
-      type: 'checkbox',
-      checked: settings.check_for_updates,
-      click: toggleSetting('check_for_updates')
-    },
+    ...buildPreferenceMenuItems(),
     { type: 'separator' },
     {
       label: 'About',
@@ -143,16 +128,4 @@ function buildMenu(): Menu {
     }
   ];
   return Menu.buildFromTemplate(items);
-}
-
-function toggleSetting(key: keyof typeof settings): () => void {
-  return () => {
-    settings[key] = !settings[key];
-    saveSettings();
-    refreshMenu();
-  };
-}
-
-function refreshMenu(): void {
-  tray!.setContextMenu(buildMenu());
 }

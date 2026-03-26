@@ -1,6 +1,9 @@
 import path from 'path';
 import { app, BrowserWindow, Menu, session, shell } from 'electron';
+import { showAboutWindow } from './about';
 import { getWindowIcon, MESSENGER_URL, PARTITION, PLATFORM } from './util/constants';
+import { registerMenuRefreshListener } from './menuRefresh';
+import { buildPreferenceMenuItems } from './preferencesMenu';
 import { isInternalUrl, setupNavigationGuard } from './util/navigation';
 import { settings } from './persistence/settings';
 import { loadWindowState, saveBounds, saveWindowState, windowState } from './persistence/windowState';
@@ -14,13 +17,8 @@ export interface AppCallbacks {
 
 const log = createLogger('window');
 
-// Suppress the default Electron menu on Windows/Linux before the app is ready.
-// macOS gets a custom menu via setupMacAppMenu() inside createMainWindow().
-if (PLATFORM !== 'darwin') {
-  Menu.setApplicationMenu(null);
-}
-
 let mainWindow: BrowserWindow | null = null;
+let hasRegisteredAppMenuRefresh = false;
 
 export function showWindow(): void {
   if (!mainWindow || mainWindow.isDestroyed()) {
@@ -53,8 +51,10 @@ export function createMainWindow(appCallbacks: AppCallbacks): void {
 
   log.info('Creating main window in', `${windowState.width}x${windowState.height}`);
 
-  if (PLATFORM === 'darwin') {
-    setupMacAppMenu();
+  setupApplicationMenu();
+  if (!hasRegisteredAppMenuRefresh) {
+    registerMenuRefreshListener(setupApplicationMenu);
+    hasRegisteredAppMenuRefresh = true;
   }
 
   mainWindow = new BrowserWindow({
@@ -99,7 +99,12 @@ function setupWindow(browserWindow: BrowserWindow, onTitleUpdate: (title: string
     callback(true);
   });
 
-  browserWindow.setMenuBarVisibility(false);
+  if (PLATFORM === 'darwin') {
+    browserWindow.setMenuBarVisibility(false);
+  } else {
+    browserWindow.setAutoHideMenuBar(false);
+    browserWindow.setMenuBarVisibility(true);
+  }
   setupNavigationGuard(browserWindow, true);
 
   browserWindow.webContents.setWindowOpenHandler(({ url }) => {
@@ -131,7 +136,7 @@ function setupWindow(browserWindow: BrowserWindow, onTitleUpdate: (title: string
 // Wires up close and minimize events to respect tray settings.
 function setupWindowEvents(browserWindow: BrowserWindow, isQuitting: () => boolean): void {
   browserWindow.on('close', (e) => {
-    if (!isQuitting() && settings.close_to_tray) {
+    if (!isQuitting() && settings.show_tray_icon && settings.close_to_tray) {
       log.info('Close intercepted, hiding to tray');
       e.preventDefault();
       browserWindow.hide();
@@ -146,7 +151,7 @@ function setupWindowEvents(browserWindow: BrowserWindow, isQuitting: () => boole
   });
 
   browserWindow.on('minimize', () => {
-    if (settings.minimize_to_tray) {
+    if (settings.show_tray_icon && settings.minimize_to_tray) {
       log.info('Minimize intercepted, hiding to tray');
       browserWindow.hide();
     }
@@ -188,27 +193,58 @@ function setupBoundsTracking(browserWindow: BrowserWindow): void {
   }
 }
 
-// On macOS the global app menu lives outside any window. Set a minimal one so
-// that standard keyboard shortcuts (Cmd+C/V/X/A/Z) work inside the web view.
-function setupMacAppMenu(): void {
-  Menu.setApplicationMenu(
-    Menu.buildFromTemplate([
-      {
-        label: app.name,
-        submenu: [{ role: 'hide' }, { role: 'hideOthers' }, { role: 'unhide' }, { type: 'separator' }, { role: 'quit' }]
-      },
-      {
-        label: 'Edit',
-        submenu: [
-          { role: 'undo' },
-          { role: 'redo' },
-          { type: 'separator' },
-          { role: 'cut' },
-          { role: 'copy' },
-          { role: 'paste' },
-          { role: 'selectAll' }
-        ]
+// On macOS this becomes the global app menu. On Windows/Linux it appears in the
+// window menu bar so the Settings items remain accessible even without a tray icon.
+function setupApplicationMenu(): void {
+  const template = [] as Electron.MenuItemConstructorOptions[];
+  const appSubmenu: Electron.MenuItemConstructorOptions[] = [
+    {
+      label: 'About',
+      click: () => {
+        showAboutWindow();
       }
-    ])
+    }
+  ];
+
+  const appMenu: Electron.MenuItemConstructorOptions = {
+    label: app.name,
+    submenu: appSubmenu
+  };
+
+  if (PLATFORM === 'darwin') {
+    appSubmenu.push(
+      { type: 'separator' },
+      { role: 'hide' },
+      { role: 'hideOthers' },
+      { role: 'unhide' }
+    );
+  }
+
+  appSubmenu.push(
+    { type: 'separator' },
+    { role: 'quit' }
   );
+
+  template.push(appMenu);
+
+  template.push(
+    {
+      label: 'Settings',
+      submenu: buildPreferenceMenuItems()
+    },
+    {
+      label: 'Edit',
+      submenu: [
+        { role: 'undo' },
+        { role: 'redo' },
+        { type: 'separator' },
+        { role: 'cut' },
+        { role: 'copy' },
+        { role: 'paste' },
+        { role: 'selectAll' }
+      ]
+    }
+  );
+
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 }
