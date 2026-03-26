@@ -38,6 +38,7 @@ npm run build
 - Persisted window size/position
 - Voice and video call support
 - Windows, macOS, and Linux support
+- Send notifications for new messages (currently Mac only)
 
 ## Installation
 
