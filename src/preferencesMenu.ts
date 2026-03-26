@@ -6,19 +6,12 @@ import { isRunOnStartup, setRunOnStartup } from './util/startup';
 import { checkForUpdates } from './util/updater';
 
 export function buildPreferenceMenuItems(): MenuItemConstructorOptions[] {
-  return [
+  const items: MenuItemConstructorOptions[] = [
     {
       label: 'Show notifications',
       type: 'checkbox',
       checked: settings.show_notifications,
       click: toggleSetting('show_notifications')
-    },
-    { type: 'separator' },
-    {
-      label: PLATFORM === 'darwin' ? 'Show menu bar icon' : 'Show tray icon',
-      type: 'checkbox',
-      checked: settings.show_tray_icon,
-      click: toggleSetting('show_tray_icon')
     },
     {
       label: 'Minimize to tray',
@@ -49,7 +42,7 @@ export function buildPreferenceMenuItems(): MenuItemConstructorOptions[] {
       click: toggleSetting('start_minimized')
     },
     {
-      label: 'Automatically check for updates',
+      label: 'Check for updates on startup',
       type: 'checkbox',
       checked: settings.check_for_updates,
       click: toggleSetting('check_for_updates')
@@ -61,6 +54,22 @@ export function buildPreferenceMenuItems(): MenuItemConstructorOptions[] {
       }
     }
   ];
+
+  if (PLATFORM === 'darwin') {
+    items.splice(1, 0,
+      { type: 'separator' },
+      {
+        label: 'Show menu bar icon',
+        type: 'checkbox',
+        checked: settings.show_tray_icon,
+        click: toggleSetting('show_tray_icon')
+      }
+    );
+  } else {
+    items.splice(1, 0, { type: 'separator' });
+  }
+
+  return items;
 }
 
 function toggleSetting(key: keyof typeof settings): () => void {

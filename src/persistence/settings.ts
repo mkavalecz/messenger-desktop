@@ -2,6 +2,7 @@ import { app } from 'electron';
 import fs from 'fs';
 import path from 'path';
 import { createLogger } from '../util/logging';
+import { PLATFORM } from '../util/constants';
 import { readJsonFile } from './persistence';
 
 export interface Settings {
@@ -55,7 +56,7 @@ export function saveSettings(): void {
 }
 
 function normalizeSettings(): void {
-  if (settings.minimize_to_tray || settings.close_to_tray) {
+  if (PLATFORM !== 'darwin' || settings.minimize_to_tray || settings.close_to_tray) {
     settings.show_tray_icon = true;
   }
 }
