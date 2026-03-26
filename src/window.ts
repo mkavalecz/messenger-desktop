@@ -96,7 +96,7 @@ function setupWindow(browserWindow: BrowserWindow, onTitleUpdate: (title: string
   });
 
   browserWindow.setMenuBarVisibility(false);
-  setupNavigationGuard(browserWindow);
+  setupNavigationGuard(browserWindow, false);
 
   browserWindow.webContents.setWindowOpenHandler(({ url }) => {
     if (isAllowedHost(url)) {
@@ -109,7 +109,7 @@ function setupWindow(browserWindow: BrowserWindow, onTitleUpdate: (title: string
 
   browserWindow.webContents.on('did-create-window', (popupWindow) => {
     popupWindow.setMenuBarVisibility(false);
-    setupNavigationGuard(popupWindow);
+    setupNavigationGuard(popupWindow, true);
     popupWindow.webContents.on('did-navigate', (_e, url) => {
       if (isAllowedHost(url)) {
         popupWindow.show();
