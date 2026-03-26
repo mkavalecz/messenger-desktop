@@ -2,10 +2,12 @@ import { app } from 'electron';
 import fs from 'fs';
 import path from 'path';
 import { createLogger } from '../util/logging';
+import { PLATFORM } from '../util/constants';
 import { readJsonFile } from './persistence';
 
 export interface Settings {
   show_notifications: boolean;
+  show_tray_icon: boolean;
   minimize_to_tray: boolean;
   close_to_tray: boolean;
   start_minimized: boolean;
@@ -16,6 +18,7 @@ const log = createLogger('settings');
 
 export const settings: Settings = {
   show_notifications: true,
+  show_tray_icon: true,
   minimize_to_tray: true,
   close_to_tray: true,
   start_minimized: false,
@@ -35,6 +38,7 @@ export function loadSettings(): void {
     saveSettings();
   } else {
     Object.assign(settings, result.data);
+    normalizeSettings();
     log.info('Loaded successfully');
   }
 }
@@ -42,11 +46,18 @@ export function loadSettings(): void {
 export function saveSettings(): void {
   const filePath = settingsPath();
   try {
+    normalizeSettings();
     log.info('Saving to', filePath);
     fs.writeFileSync(filePath, JSON.stringify(settings, null, 2));
     log.info('Saved successfully');
   } catch (e) {
     log.error('Failed to save:', e instanceof Error ? e.message : e);
+  }
+}
+
+function normalizeSettings(): void {
+  if (PLATFORM !== 'darwin' || settings.minimize_to_tray || settings.close_to_tray) {
+    settings.show_tray_icon = true;
   }
 }
 
