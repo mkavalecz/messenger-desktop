@@ -1,6 +1,6 @@
 import { BrowserWindow, shell } from 'electron';
 import { createLogger } from './logging';
-import { MESSENGER_URL } from './constants';
+import { CALL_URL, MESSENGER_URL } from './constants';
 
 const log = createLogger('navigation');
 
@@ -24,5 +24,5 @@ export function setupNavigationGuard(browserWindow: BrowserWindow, destroyWindow
 
 // Returns true if the URL belongs to Messenger.
 export function isAllowedHost(url: string): boolean {
-  return url === 'about:blank' || url?.startsWith(MESSENGER_URL);
+  return url === 'about:blank' || url?.startsWith(MESSENGER_URL) || url?.startsWith(CALL_URL);
 }

@@ -8,6 +8,7 @@ export const APP_NAME = 'Messenger Desktop';
 export const APP_ID = 'io.github.mkavalecz.messenger-desktop';
 
 export const MESSENGER_URL = 'https://www.facebook.com/messages';
+export const CALL_URL = 'https://www.facebook.com/groupcall';
 export const PARTITION = 'persist:messenger';
 
 export const BADGE_CLEAR_DELAY_MS = 2000;
