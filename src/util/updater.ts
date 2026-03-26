@@ -56,7 +56,7 @@ function showUpdateNotification(version: string): void {
   updateNotification.show();
 }
 
-function isNewerVersion(latestVersion: string, currentVersion: string): boolean {
+export function isNewerVersion(latestVersion: string, currentVersion: string): boolean {
   const [latestMajor, latestMinor, latestPatch] = parseVersion(latestVersion);
   const [currentMajor, currentMinor, currentPatch] = parseVersion(currentVersion);
 
@@ -71,6 +71,6 @@ function isNewerVersion(latestVersion: string, currentVersion: string): boolean 
   return latestPatch > currentPatch;
 }
 
-function parseVersion(versionString: string): number[] {
+export function parseVersion(versionString: string): number[] {
   return versionString.replace(/^v/, '').split('.').map(Number);
 }

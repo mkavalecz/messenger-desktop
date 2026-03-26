@@ -42,17 +42,17 @@ describe('notifications', () => {
       };
     });
 
-    jest.doMock('../util/constants', () => ({
+    jest.doMock('../../src/util/constants', () => ({
       PLATFORM: 'darwin'
     }));
 
-    jest.doMock('../persistence/settings', () => ({
+    jest.doMock('../../src/persistence/settings', () => ({
       settings: { show_notifications: true }
     }));
   });
 
   function loadNotificationModule() {
-    return require('../notification') as typeof import('../notification');
+    return require('../../src/notification') as typeof import('../../src/notification');
   }
 
   function createMockWindow(): MockWindowInstance {
