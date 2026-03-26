@@ -29,8 +29,6 @@ if (!app.requestSingleInstanceLock()) {
     if (process.platform === 'darwin') {
       await systemPreferences.askForMediaAccess('camera');
       await systemPreferences.askForMediaAccess('microphone');
-      // Notification permission must be requested from the renderer process using Notification.requestPermission().
-      // See: https://www.electronjs.org/docs/latest/tutorial/notifications#requesting-permission
     }
 
     loadSettings();
