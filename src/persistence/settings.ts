@@ -5,6 +5,7 @@ import { createLogger } from '../util/logging';
 import { readJsonFile } from './persistence';
 
 export interface Settings {
+  show_notifications: boolean;
   minimize_to_tray: boolean;
   close_to_tray: boolean;
   start_minimized: boolean;
@@ -14,6 +15,7 @@ export interface Settings {
 const log = createLogger('settings');
 
 export const settings: Settings = {
+  show_notifications: true,
   minimize_to_tray: true,
   close_to_tray: true,
   start_minimized: false,

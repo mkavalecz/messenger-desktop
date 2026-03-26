@@ -88,6 +88,13 @@ function buildMenu(): Menu {
     },
     { type: 'separator' },
     {
+      label: 'Show notifications',
+      type: 'checkbox',
+      checked: settings.show_notifications,
+      click: toggleSetting('show_notifications')
+    },
+    { type: 'separator' },
+    {
       label: 'Minimize to tray',
       type: 'checkbox',
       checked: settings.minimize_to_tray,
