@@ -30,7 +30,7 @@ export default defineConfig([
     }
   },
   {
-    files: ['src/**/__tests__/**/*.ts'],
+    files: ['tests/**/*.ts'],
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',

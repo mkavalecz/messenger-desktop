@@ -1,7 +1,7 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { readJsonFile } from '../persistence';
+import { readJsonFile } from '../../../src/persistence/persistence';
 
 describe('readJsonFile', () => {
   let tmpDir: string;

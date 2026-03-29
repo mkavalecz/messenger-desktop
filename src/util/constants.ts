@@ -9,8 +9,14 @@ export const APP_ID = 'io.github.mkavalecz.messenger-desktop';
 export const PARTITION = 'persist:messenger';
 
 export const MESSENGER_URL = 'https://www.facebook.com/messages';
-export const CALL_URL = 'https://www.facebook.com/groupcall';
-export const INTERNAL_URL_RULES = [{ url: 'about:blank', fullMatch: true }, { url: MESSENGER_URL }, { url: CALL_URL }];
+export const INTERNAL_URL_RULES = [
+  { url: 'about:blank', fullMatch: true },
+  { url: MESSENGER_URL },
+  { url: 'https://www.facebook.com/groupcall' },
+  { url: 'https://www.facebook.com/login' },
+  { url: 'https://www.facebook.com/two_step_verification' },
+  { url: 'https://www.facebook.com/two_factor' }
+];
 
 export const BADGE_CLEAR_DELAY_MS = 2000;
 

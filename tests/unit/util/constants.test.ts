@@ -33,7 +33,7 @@ describe('getWindowIcon', () => {
 
   function loadWithPlatform(platform: string) {
     Object.defineProperty(process, 'platform', { value: platform });
-    return require('../constants') as typeof import('../constants');
+    return require('../../../src/util/constants') as typeof import('../../../src/util/constants');
   }
 });
 
@@ -83,6 +83,6 @@ describe('getTrayIcon', () => {
 
   function loadWithPlatform(platform: string) {
     Object.defineProperty(process, 'platform', { value: platform });
-    return require('../constants') as typeof import('../constants');
+    return require('../../../src/util/constants') as typeof import('../../../src/util/constants');
   }
 });
