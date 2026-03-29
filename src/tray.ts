@@ -2,9 +2,8 @@ import type { MenuItemConstructorOptions, NativeImage } from 'electron';
 import { app, Menu, Tray } from 'electron';
 import { BADGE_CLEAR_DELAY_MS, getTrayIcon, PLATFORM } from './util/constants';
 import { showAboutWindow } from './about';
-import { registerMenuRefreshListener } from './menuRefresh';
+import { buildMenuItems, registerMenuRefreshListener } from './menu';
 import { settings } from './persistence/settings';
-import { buildPreferenceMenuItems } from './preferencesMenu';
 import { createLogger } from './util/logging';
 
 export interface TrayCallbacks {
@@ -20,7 +19,7 @@ let iconBadge: NativeImage | null = null;
 let hasBadge = false;
 let badgeTimer: NodeJS.Timeout | null = null;
 let callbacks: TrayCallbacks | null = null;
-let hasRegisteredMenuRefreshListener = false;
+let hasRegisteredMenuRefresh = false;
 
 export function createTray(trayCallbacks: TrayCallbacks): void {
   log.info('Initializing tray');
@@ -32,36 +31,14 @@ export function createTray(trayCallbacks: TrayCallbacks): void {
   if (PLATFORM !== 'darwin' && iconBadge === null) {
     iconBadge = getTrayIcon(true);
   }
-  if (!hasRegisteredMenuRefreshListener) {
+  if (!hasRegisteredMenuRefresh) {
     registerMenuRefreshListener(syncTray);
-    hasRegisteredMenuRefreshListener = true;
+    hasRegisteredMenuRefresh = true;
   }
 
   syncTray();
 
   log.info('Tray initialized');
-}
-
-function syncTray(): void {
-  if (!settings.show_tray_icon) {
-    if (tray !== null) {
-      log.info('Removing tray');
-      tray.destroy();
-      tray = null;
-    }
-    return;
-  }
-
-  if (tray === null) {
-    log.info('Creating tray');
-    tray = new Tray(iconNormal!);
-    tray.setToolTip(`${app.name} v${app.getVersion()}`);
-    tray.on('click', () => {
-      callbacks!.toggleWindow();
-    });
-  }
-
-  tray.setContextMenu(buildMenu());
 }
 
 export function updateBadge(title: string): void {
@@ -83,22 +60,44 @@ export function updateBadge(title: string): void {
   }
 }
 
+function syncTray(): void {
+  if (!settings.show_tray_icon) {
+    if (tray !== null) {
+      log.info('Removing tray');
+      tray.destroy();
+      tray = null;
+    }
+    return;
+  }
+
+  if (tray === null) {
+    log.info('Creating tray');
+    tray = new Tray(iconNormal!);
+    tray.setToolTip(`${app.getName()} v${app.getVersion()}`);
+    tray.on('click', () => {
+      callbacks!.toggleWindow();
+    });
+  }
+
+  tray.setContextMenu(buildMenu());
+}
+
 function showBadge(show: boolean) {
   if (show) {
     log.info('Badge on');
     hasBadge = true;
     if (PLATFORM === 'darwin') {
       app.dock?.setBadge('●');
-    } else {
-      tray!.setImage(iconBadge!);
+    } else if (tray !== null) {
+      tray.setImage(iconBadge!);
     }
   } else {
     log.info('Badge off');
     hasBadge = false;
     if (PLATFORM === 'darwin') {
       app.dock?.setBadge('');
-    } else {
-      tray!.setImage(iconNormal!);
+    } else if (tray !== null) {
+      tray.setImage(iconNormal!);
     }
   }
 }
@@ -112,7 +111,7 @@ function buildMenu(): Menu {
       }
     },
     { type: 'separator' },
-    ...buildPreferenceMenuItems(),
+    ...buildMenuItems(),
     { type: 'separator' },
     {
       label: 'About',

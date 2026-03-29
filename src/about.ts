@@ -1,5 +1,5 @@
 import { app, BrowserWindow, shell } from 'electron';
-import { ABOUT_HTML_PATH, APP_NAME } from './util/constants';
+import { ABOUT_HTML_PATH } from './util/constants';
 import { createLogger } from './util/logging';
 
 const log = createLogger('about');
@@ -19,7 +19,7 @@ export function showAboutWindow(): void {
     minimizable: false,
     maximizable: false,
     fullscreenable: false,
-    title: `About ${APP_NAME}`,
+    title: `About ${app.getName()}`,
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false

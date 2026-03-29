@@ -1,7 +1,7 @@
-import { BrowserWindow, Notification, app } from 'electron';
-import { settings } from './persistence/settings';
-import { createLogger } from './util/logging';
-import { PLATFORM } from './util/constants';
+import { app, BrowserWindow, Notification } from 'electron';
+import { settings } from '../persistence/settings';
+import { createLogger } from './logging';
+import { PLATFORM } from './constants';
 
 const log = createLogger('notification');
 

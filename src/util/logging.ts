@@ -1,8 +1,7 @@
-import { app } from 'electron';
 import fs from 'fs';
 import zlib from 'zlib';
 import path from 'path';
-import { LOG_ROTATION_MAX_FILES, LOG_ROTATION_SIZE_BYTES } from './constants';
+import { getLogFile, getLogsDir, LOG_ROTATION_MAX_FILES, LOG_ROTATION_SIZE_BYTES } from './constants';
 
 export interface Logger {
   info: (message: string, ...args: unknown[]) => void;
@@ -32,17 +31,15 @@ export function createLogger(module: string): Logger {
   };
 }
 
-// Lazily initializes the log file on the first write. Called before app.whenReady()
-// is safe because app.getPath('logs') is available as soon as the main process starts.
+// Lazily initializes the log file on the first write.
 function initLogFile(): void {
   if (logFileSetupDone) {
     return;
   }
   logFileSetupDone = true;
   try {
-    const logsDir = app.getPath('logs');
-    fs.mkdirSync(logsDir, { recursive: true });
-    logFilePath = path.join(logsDir, 'app.log');
+    fs.mkdirSync(getLogsDir(), { recursive: true });
+    logFilePath = getLogFile();
 
     // Seed the in-memory counter from the actual file size so the threshold is
     // accurate even across restarts. Rotate immediately if already over the limit.
@@ -86,7 +83,7 @@ function writeToFile(level: string, moduleName: string, message: string, args: u
 // Compresses the current log file to app.1.log.gz, shifts older compressed logs
 // down by one, and drops the oldest if LOG_ROTATION_MAX_FILES would be exceeded.
 // All operations are synchronous to avoid concurrency issues.
-// If anything fails the current log file is left untouched and rotation is
+// If anything fails, the current log file is left untouched and rotation is
 // disabled for this session via rotationFailed.
 function rotateLogs(): void {
   if (logFilePath === null) {
@@ -119,7 +116,7 @@ function rotateLogs(): void {
     bytesWritten = 0;
   } catch {
     // If rotation fails (e.g. disk full), stop retrying for this session.
-    // The file will keep growing but writes will continue uninterrupted.
+    // The file will keep growing, but writes will continue uninterrupted.
     rotationFailed = true;
   }
 }

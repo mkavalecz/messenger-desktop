@@ -1,9 +1,8 @@
 import type { BrowserWindow } from 'electron';
-import { app } from 'electron';
 import fs from 'fs';
-import path from 'path';
 import { createLogger } from '../util/logging';
 import { readJsonFile } from './persistence';
+import { getWindowStateFile } from '../util/constants';
 
 export interface WindowState {
   x?: number;
@@ -18,10 +17,9 @@ const log = createLogger('windowState');
 export const windowState: WindowState = { width: 1280, height: 720, maximized: false };
 
 export function loadWindowState(): void {
-  const filePath = statePath();
-  log.info('Loading from', filePath);
+  log.info('Loading from', getWindowStateFile());
 
-  const result = readJsonFile<WindowState>(filePath);
+  const result = readJsonFile<WindowState>(getWindowStateFile());
 
   if (result.status === 'missing') {
     log.info('Window state file not found, saving defaults');
@@ -36,10 +34,9 @@ export function loadWindowState(): void {
 }
 
 export function saveWindowState(): void {
-  const filePath = statePath();
   try {
-    log.info('Saving to', filePath);
-    fs.writeFileSync(filePath, JSON.stringify(windowState, null, 2));
+    log.info('Saving to', getWindowStateFile());
+    fs.writeFileSync(getWindowStateFile(), JSON.stringify(windowState, null, 2));
     log.info('Saved successfully');
   } catch (e) {
     log.error('Failed to save:', e instanceof Error ? e.message : e);
@@ -52,8 +49,4 @@ export function saveBounds(browserWindow: BrowserWindow): void {
   }
   Object.assign(windowState, browserWindow.getBounds());
   saveWindowState();
-}
-
-function statePath(): string {
-  return path.join(app.getPath('userData'), 'window-state.json');
 }

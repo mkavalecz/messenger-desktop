@@ -1,5 +1,5 @@
 import { app, dialog, net, Notification, shell } from 'electron';
-import { GITHUB_RELEASES_API_URL, GITHUB_RELEASES_URL, PLATFORM, UPDATE_CHECK_DELAY_MS } from './constants';
+import { GITHUB_RELEASES_API_URL, GITHUB_RELEASES_URL, PLATFORM } from './constants';
 import { createLogger } from './logging';
 
 const log = createLogger('updater');
@@ -7,29 +7,26 @@ const log = createLogger('updater');
 // Held at module scope to prevent garbage collection before the notification renders.
 let updateNotification: Notification | null = null;
 
-export interface CheckForUpdatesOptions {
-  interactive?: boolean;
-}
-
-export async function checkForUpdates(options: CheckForUpdatesOptions = {}): Promise<void> {
-  const { interactive = false } = options;
-
-  if (!interactive) {
-    await new Promise((resolve) => setTimeout(resolve, UPDATE_CHECK_DELAY_MS));
-  }
-
+export async function checkForUpdates(interactive: boolean = false): Promise<void> {
   try {
     log.info('Checking for updates');
     const response = await net.fetch(GITHUB_RELEASES_API_URL);
     if (!response.ok) {
       log.warn('Update check failed with status:', String(response.status));
       if (interactive) {
-        await showUpdateError('The update server returned an unexpected response.');
+        await showUpdateErrorDialog('The update server returned an unexpected response.');
       }
       return;
     }
-    const data = (await response.json()) as { tag_name: string };
+    const data = (await response.json()) as { tag_name: unknown };
     const latestVersion = data.tag_name;
+    if (typeof latestVersion !== 'string' || latestVersion === '') {
+      log.warn('Update check returned unexpected data:', String(latestVersion));
+      if (interactive) {
+        await showUpdateErrorDialog('The update server returned unexpected data.');
+      }
+      return;
+    }
     const currentVersion = app.getVersion();
 
     if (isNewerVersion(latestVersion, currentVersion)) {
@@ -42,20 +39,24 @@ export async function checkForUpdates(options: CheckForUpdatesOptions = {}): Pro
     } else {
       log.info(`App is up to date (${currentVersion})`);
       if (interactive) {
-        await dialog.showMessageBox({
-          type: 'info',
-          title: 'No updates available',
-          message: 'Messenger Desktop is up to date.',
-          detail: `You are using version ${currentVersion}.`
-        });
+        await showNoUpdatesAvailableDialog(currentVersion);
       }
     }
   } catch (e) {
     log.warn('Update check failed:', e instanceof Error ? e.message : e);
     if (interactive) {
-      await showUpdateError('Unable to check for updates right now. Please try again later.');
+      await showUpdateErrorDialog('Unable to check for updates right now. Please try again later.');
     }
   }
+}
+
+async function showNoUpdatesAvailableDialog(currentVersion: string): Promise<void> {
+  await dialog.showMessageBox({
+    type: 'info',
+    title: 'No updates available',
+    message: 'Messenger Desktop is up to date.',
+    detail: `You are using version ${currentVersion}.`
+  });
 }
 
 async function showUpdateAvailableDialog(version: string): Promise<void> {
@@ -74,12 +75,12 @@ async function showUpdateAvailableDialog(version: string): Promise<void> {
   }
 }
 
-async function showUpdateError(detail: string): Promise<void> {
+async function showUpdateErrorDialog(details: string): Promise<void> {
   await dialog.showMessageBox({
     type: 'error',
     title: 'Update check failed',
     message: 'Unable to check for updates.',
-    detail
+    detail: details
   });
 }
 

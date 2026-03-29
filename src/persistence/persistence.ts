@@ -6,10 +6,15 @@ export type ReadResult<T> =
   | { status: 'corrupt'; rawContent: string };
 
 export function readJsonFile<T>(filePath: string): ReadResult<T> {
-  if (!fs.existsSync(filePath)) {
-    return { status: 'missing' };
+  let rawContent: string;
+  try {
+    rawContent = fs.readFileSync(filePath, 'utf8');
+  } catch (e) {
+    if ((e as NodeJS.ErrnoException).code === 'ENOENT') {
+      return { status: 'missing' };
+    }
+    throw e;
   }
-  const rawContent = fs.readFileSync(filePath, 'utf8');
   try {
     return { status: 'loaded', data: JSON.parse(rawContent) as Partial<T> };
   } catch {

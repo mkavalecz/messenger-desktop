@@ -1,14 +1,13 @@
 import path from 'path';
 import { app, BrowserWindow, Menu, session, shell } from 'electron';
-import { showAboutWindow } from './about';
 import { getWindowIcon, MESSENGER_URL, PARTITION, PLATFORM } from './util/constants';
-import { registerMenuRefreshListener } from './menuRefresh';
-import { buildPreferenceMenuItems } from './preferencesMenu';
+import { setupMacApplicationMenu } from './menu';
 import { isInternalUrl, setupNavigationGuard } from './util/navigation';
 import { settings } from './persistence/settings';
 import { loadWindowState, saveBounds, saveWindowState, windowState } from './persistence/windowState';
 import { createLogger } from './util/logging';
-import { resetNotificationLock, setupWindowNotifications } from './notification';
+import { resetNotificationLock, setupWindowNotifications } from './util/notification';
+import { hideDockIcon, showDockIcon } from './dock';
 
 export interface AppCallbacks {
   isQuitting: () => boolean;
@@ -18,7 +17,6 @@ export interface AppCallbacks {
 const log = createLogger('window');
 
 let mainWindow: BrowserWindow | null = null;
-let hasRegisteredMacMenuRefresh = false;
 
 export function showWindow(): void {
   if (!mainWindow || mainWindow.isDestroyed()) {
@@ -55,10 +53,6 @@ export function createMainWindow(appCallbacks: AppCallbacks): void {
 
   if (PLATFORM === 'darwin') {
     setupMacApplicationMenu();
-    if (!hasRegisteredMacMenuRefresh) {
-      registerMenuRefreshListener(setupMacApplicationMenu);
-      hasRegisteredMacMenuRefresh = true;
-    }
   } else {
     Menu.setApplicationMenu(null);
   }
@@ -107,7 +101,6 @@ function setupWindow(browserWindow: BrowserWindow, onTitleUpdate: (title: string
     callback(true);
   });
 
-  browserWindow.setAutoHideMenuBar(true);
   browserWindow.setMenuBarVisibility(false);
   setupNavigationGuard(browserWindow, true);
 
@@ -164,24 +157,8 @@ function setupWindowEvents(browserWindow: BrowserWindow, isQuitting: () => boole
   });
 }
 
-function showDockIcon(): void {
-  if (PLATFORM !== 'darwin') {
-    return;
-  }
-
-  void app.dock?.show();
-}
-
-function hideDockIcon(): void {
-  if (PLATFORM !== 'darwin' || !settings.show_tray_icon) {
-    return;
-  }
-
-  app.dock?.hide();
-}
-
 // Tracks window size and position for persistence across restarts.
-// Uses end-of-gesture events on Windows/macOS; debounces on Linux which lacks them.
+// Uses end-of-gesture events on Windows/macOS; debounces on Linux, which lacks them.
 function setupBoundsTracking(browserWindow: BrowserWindow): void {
   browserWindow.on('maximize', () => {
     windowState.maximized = true;
@@ -213,50 +190,4 @@ function setupBoundsTracking(browserWindow: BrowserWindow): void {
       saveBounds(browserWindow);
     });
   }
-}
-
-// On macOS the global app menu lives outside any window. Keep the custom
-// Settings menu there while Windows/Linux continue to use only the tray menu.
-function setupMacApplicationMenu(): void {
-  const template = [] as Electron.MenuItemConstructorOptions[];
-  const appSubmenu: Electron.MenuItemConstructorOptions[] = [
-    {
-      label: 'About',
-      click: () => {
-        showAboutWindow();
-      }
-    }
-  ];
-
-  const appMenu: Electron.MenuItemConstructorOptions = {
-    label: app.name,
-    submenu: appSubmenu
-  };
-
-  appSubmenu.push({ type: 'separator' }, { role: 'hide' }, { role: 'hideOthers' }, { role: 'unhide' });
-
-  appSubmenu.push({ type: 'separator' }, { role: 'quit' });
-
-  template.push(appMenu);
-
-  template.push(
-    {
-      label: 'Settings',
-      submenu: buildPreferenceMenuItems()
-    },
-    {
-      label: 'Edit',
-      submenu: [
-        { role: 'undo' },
-        { role: 'redo' },
-        { type: 'separator' },
-        { role: 'cut' },
-        { role: 'copy' },
-        { role: 'paste' },
-        { role: 'selectAll' }
-      ]
-    }
-  );
-
-  Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 }

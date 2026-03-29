@@ -1,8 +1,6 @@
-import { app } from 'electron';
 import fs from 'fs';
-import path from 'path';
 import { createLogger } from '../util/logging';
-import { PLATFORM } from '../util/constants';
+import { getSettingsFile, PLATFORM } from '../util/constants';
 import { readJsonFile } from './persistence';
 
 export interface Settings {
@@ -26,10 +24,9 @@ export const settings: Settings = {
 };
 
 export function loadSettings(): void {
-  const filePath = settingsPath();
-  log.info('Loading from', filePath);
+  log.info('Loading from', getSettingsFile());
 
-  const result = readJsonFile<Settings>(filePath);
+  const result = readJsonFile<Settings>(getSettingsFile());
   if (result.status === 'missing') {
     log.info('Settings file not found, saving defaults');
     saveSettings();
@@ -38,29 +35,24 @@ export function loadSettings(): void {
     saveSettings();
   } else {
     Object.assign(settings, result.data);
-    normalizeSettings();
+    enforceRelatedSettings();
     log.info('Loaded successfully');
   }
 }
 
 export function saveSettings(): void {
-  const filePath = settingsPath();
   try {
-    normalizeSettings();
-    log.info('Saving to', filePath);
-    fs.writeFileSync(filePath, JSON.stringify(settings, null, 2));
+    enforceRelatedSettings();
+    log.info('Saving to', getSettingsFile());
+    fs.writeFileSync(getSettingsFile(), JSON.stringify(settings, null, 2));
     log.info('Saved successfully');
   } catch (e) {
     log.error('Failed to save:', e instanceof Error ? e.message : e);
   }
 }
 
-function normalizeSettings(): void {
+function enforceRelatedSettings(): void {
   if (PLATFORM !== 'darwin' || settings.minimize_to_tray || settings.close_to_tray) {
     settings.show_tray_icon = true;
   }
-}
-
-function settingsPath(): string {
-  return path.join(app.getPath('userData'), 'settings.json');
 }

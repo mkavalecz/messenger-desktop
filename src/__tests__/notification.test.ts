@@ -52,7 +52,7 @@ describe('notifications', () => {
   });
 
   function loadNotificationModule() {
-    return require('../notification') as typeof import('../notification');
+    return require('../util/notification') as typeof import('../util/notification');
   }
 
   function createMockWindow(): MockWindowInstance {
