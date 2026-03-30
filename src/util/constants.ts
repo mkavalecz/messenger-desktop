@@ -16,6 +16,7 @@ export const INTERNAL_URL_RULES = [
   { url: 'https://www.facebook.com/login' },
   { url: 'https://www.facebook.com/two_step_verification' },
   { url: 'https://www.facebook.com/two_factor' },
+  { url: 'https://www.facebook.com/messenger_media' },
   { url: 'blob:' },
   { url: 'data:' },
   { url: 'javascript:' },
