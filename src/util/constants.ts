@@ -15,7 +15,12 @@ export const INTERNAL_URL_RULES = [
   { url: 'https://www.facebook.com/groupcall' },
   { url: 'https://www.facebook.com/login' },
   { url: 'https://www.facebook.com/two_step_verification' },
-  { url: 'https://www.facebook.com/two_factor' }
+  { url: 'https://www.facebook.com/two_factor' },
+  { url: 'blob:' },
+  { url: 'data:' },
+  { url: 'javascript:' },
+  { url: 'ws:' },
+  { url: 'wss:' }
 ];
 
 export const BADGE_CLEAR_DELAY_MS = 2000;
