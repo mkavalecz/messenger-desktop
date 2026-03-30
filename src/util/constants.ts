@@ -1,5 +1,5 @@
 import path from 'path';
-import { nativeImage } from 'electron';
+import { app, nativeImage } from 'electron';
 
 // noinspection JSDeprecatedSymbols
 export const PLATFORM = process.platform;
@@ -19,7 +19,6 @@ export const INTERNAL_URL_RULES = [
 ];
 
 export const BADGE_CLEAR_DELAY_MS = 2000;
-export const UPDATE_CHECK_DELAY_MS = 10_000;
 
 export const LOG_ROTATION_SIZE_BYTES = 300 * 1024;
 export const LOG_ROTATION_MAX_FILES = 4;
@@ -31,6 +30,22 @@ export const GITHUB_RELEASES_API_URL = `https://api.github.com/repos/${GITHUB_RE
 export const ICONS_DIR = path.join(__dirname, '..', '..', 'icons');
 export const TRAY_ICON_DIR = path.join(ICONS_DIR, 'tray');
 export const ABOUT_HTML_PATH = path.join(__dirname, '..', '..', 'assets', 'about.html');
+
+export function getUserDataDir(): string {
+  return app.getPath('userData');
+}
+export function getWindowStateFile(): string {
+  return path.join(getUserDataDir(), 'window-state.json');
+}
+export function getSettingsFile(): string {
+  return path.join(getUserDataDir(), 'settings.json');
+}
+export function getLogsDir(): string {
+  return app.getPath('logs');
+}
+export function getLogFile(): string {
+  return path.join(getLogsDir(), 'app.log');
+}
 
 export function getWindowIcon(): string {
   if (PLATFORM === 'win32') {

@@ -1,11 +1,13 @@
 import path from 'path';
 import { app, BrowserWindow, Menu, session, shell } from 'electron';
 import { getWindowIcon, MESSENGER_URL, PARTITION, PLATFORM } from './util/constants';
+import { setupMacApplicationMenu } from './menu';
 import { isInternalUrl, setupNavigationGuard } from './util/navigation';
 import { settings } from './persistence/settings';
 import { loadWindowState, saveBounds, saveWindowState, windowState } from './persistence/windowState';
 import { createLogger } from './util/logging';
-import { resetNotificationLock, setupWindowNotifications } from './notification';
+import { resetNotificationLock, setupWindowNotifications } from './util/notification';
+import { hideDockIcon, showDockIcon } from './dock';
 
 export interface AppCallbacks {
   isQuitting: () => boolean;
@@ -14,18 +16,13 @@ export interface AppCallbacks {
 
 const log = createLogger('window');
 
-// Suppress the default Electron menu on Windows/Linux before the app is ready.
-// macOS gets a custom menu via setupMacAppMenu() inside createMainWindow().
-if (PLATFORM !== 'darwin') {
-  Menu.setApplicationMenu(null);
-}
-
 let mainWindow: BrowserWindow | null = null;
 
 export function showWindow(): void {
   if (!mainWindow || mainWindow.isDestroyed()) {
     return;
   }
+  showDockIcon();
   if (mainWindow.isMinimized()) {
     mainWindow.restore();
   }
@@ -43,6 +40,7 @@ export function toggleWindow(): void {
   }
   if (mainWindow.isVisible() && !mainWindow.isMinimized()) {
     mainWindow.hide();
+    hideDockIcon();
   } else {
     showWindow();
   }
@@ -54,7 +52,9 @@ export function createMainWindow(appCallbacks: AppCallbacks): void {
   log.info('Creating main window in', `${windowState.width}x${windowState.height}`);
 
   if (PLATFORM === 'darwin') {
-    setupMacAppMenu();
+    setupMacApplicationMenu();
+  } else {
+    Menu.setApplicationMenu(null);
   }
 
   mainWindow = new BrowserWindow({
@@ -86,8 +86,10 @@ export function createMainWindow(appCallbacks: AppCallbacks): void {
       mainWindow.maximize();
     }
     mainWindow.show();
+    showDockIcon();
     log.info('Window shown');
   } else {
+    hideDockIcon();
     log.info('Start minimized, window hidden');
   }
 }
@@ -131,10 +133,11 @@ function setupWindow(browserWindow: BrowserWindow, onTitleUpdate: (title: string
 // Wires up close and minimize events to respect tray settings.
 function setupWindowEvents(browserWindow: BrowserWindow, isQuitting: () => boolean): void {
   browserWindow.on('close', (e) => {
-    if (!isQuitting() && settings.close_to_tray) {
+    if (!isQuitting() && settings.show_tray_icon && settings.close_to_tray) {
       log.info('Close intercepted, hiding to tray');
       e.preventDefault();
       browserWindow.hide();
+      hideDockIcon();
     } else {
       log.info('Closing window, saving state');
       saveBounds(browserWindow);
@@ -146,15 +149,16 @@ function setupWindowEvents(browserWindow: BrowserWindow, isQuitting: () => boole
   });
 
   browserWindow.on('minimize', () => {
-    if (settings.minimize_to_tray) {
+    if (settings.show_tray_icon && settings.minimize_to_tray) {
       log.info('Minimize intercepted, hiding to tray');
       browserWindow.hide();
+      hideDockIcon();
     }
   });
 }
 
 // Tracks window size and position for persistence across restarts.
-// Uses end-of-gesture events on Windows/macOS; debounces on Linux which lacks them.
+// Uses end-of-gesture events on Windows/macOS; debounces on Linux, which lacks them.
 function setupBoundsTracking(browserWindow: BrowserWindow): void {
   browserWindow.on('maximize', () => {
     windowState.maximized = true;
@@ -186,29 +190,4 @@ function setupBoundsTracking(browserWindow: BrowserWindow): void {
       saveBounds(browserWindow);
     });
   }
-}
-
-// On macOS the global app menu lives outside any window. Set a minimal one so
-// that standard keyboard shortcuts (Cmd+C/V/X/A/Z) work inside the web view.
-function setupMacAppMenu(): void {
-  Menu.setApplicationMenu(
-    Menu.buildFromTemplate([
-      {
-        label: app.name,
-        submenu: [{ role: 'hide' }, { role: 'hideOthers' }, { role: 'unhide' }, { type: 'separator' }, { role: 'quit' }]
-      },
-      {
-        label: 'Edit',
-        submenu: [
-          { role: 'undo' },
-          { role: 'redo' },
-          { type: 'separator' },
-          { role: 'cut' },
-          { role: 'copy' },
-          { role: 'paste' },
-          { role: 'selectAll' }
-        ]
-      }
-    ])
-  );
 }

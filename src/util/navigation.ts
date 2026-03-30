@@ -16,7 +16,7 @@ const NAVIGATION_GUARD_SCRIPT = `(function() {
         if(rule.fullMatch) {
           return absoluteUrl === rule.url;
         }
-        return absoluteUrl?.startsWith(rule.url);
+        return absoluteUrl.startsWith(rule.url);
       });
     } catch {
       return false;
@@ -51,28 +51,28 @@ export function setupNavigationGuard(browserWindow: BrowserWindow, isMainWindow:
       log.info('Redirecting external URL to system browser:', url);
       e.preventDefault();
       if (!isMainWindow) {
-        browserWindow?.destroy();
+        browserWindow.destroy();
       }
       void shell.openExternal(url);
     }
   };
 
-  browserWindow?.webContents.on('will-navigate', blockExternal);
-  browserWindow?.webContents.on('will-redirect', blockExternal);
+  browserWindow.webContents.on('will-navigate', blockExternal);
+  browserWindow.webContents.on('will-redirect', blockExternal);
 
   if (isMainWindow) {
-    browserWindow?.webContents.on('dom-ready', () => {
+    browserWindow.webContents.on('dom-ready', () => {
       void browserWindow.webContents.executeJavaScript(NAVIGATION_GUARD_SCRIPT);
     });
   }
 }
 
 // Returns true if the URL belongs to Messenger.
-export function isInternalUrl(url: string) {
+export function isInternalUrl(url?: string) {
   return INTERNAL_URL_RULES.some((rule) => {
     if (rule.fullMatch) {
       return url === rule.url;
     }
-    return url?.startsWith(rule.url);
+    return url?.startsWith(rule.url) === true;
   });
 }
