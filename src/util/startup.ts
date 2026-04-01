@@ -12,16 +12,18 @@ function getAutostartDesktopPath(): string {
 }
 
 function buildDesktopEntry(): string {
-  return [
-    '[Desktop Entry]',
-    'Type=Application',
-    `Name=${APP_NAME}`,
-    `Exec=${process.execPath}`,
-    'X-GNOME-Autostart-enabled=true',
-    'Hidden=false',
-    'NoDisplay=false',
-    `Comment=Start ${APP_NAME} on login`,
-  ].join('\n') + '\n';
+  return (
+    [
+      '[Desktop Entry]',
+      'Type=Application',
+      `Name=${APP_NAME}`,
+      `Exec="${process.execPath}"`,
+      'X-GNOME-Autostart-enabled=true',
+      'Hidden=false',
+      'NoDisplay=false',
+      `Comment=Start ${APP_NAME} on login`
+    ].join('\n') + '\n'
+  );
 }
 
 export function isRunOnStartup(): boolean {
