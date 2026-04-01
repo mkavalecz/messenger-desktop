@@ -3,6 +3,9 @@ import { app, nativeImage } from 'electron';
 
 // noinspection JSDeprecatedSymbols
 export const PLATFORM = process.platform;
+export const IS_WAYLAND =
+  PLATFORM === 'linux' &&
+  (process.env.WAYLAND_DISPLAY !== undefined || process.env.XDG_SESSION_TYPE === 'wayland');
 
 export const APP_NAME = 'Messenger Desktop';
 export const APP_ID = 'io.github.mkavalecz.messenger-desktop';

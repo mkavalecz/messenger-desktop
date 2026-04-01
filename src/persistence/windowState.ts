@@ -2,7 +2,7 @@ import type { BrowserWindow } from 'electron';
 import fs from 'fs';
 import { createLogger } from '../util/logging';
 import { readJsonFile } from './persistence';
-import { getWindowStateFile } from '../util/constants';
+import { getWindowStateFile, IS_WAYLAND } from '../util/constants';
 
 export interface WindowState {
   x?: number;
@@ -47,6 +47,14 @@ export function saveBounds(browserWindow: BrowserWindow): void {
   if (browserWindow.isDestroyed() || browserWindow.isMinimized() || browserWindow.isMaximized()) {
     return;
   }
-  Object.assign(windowState, browserWindow.getBounds());
+  const { x, y, width, height } = browserWindow.getBounds();
+  // On Wayland, absolute window coordinates are unreliable — skip them to avoid
+  // the window jumping to a wrong position on next launch or during drag.
+  if (IS_WAYLAND) {
+    windowState.width = width;
+    windowState.height = height;
+  } else {
+    Object.assign(windowState, { x, y, width, height });
+  }
   saveWindowState();
 }

@@ -1,6 +1,6 @@
 import path from 'path';
 import { app, BrowserWindow, Menu, session, shell } from 'electron';
-import { getWindowIcon, MESSENGER_URL, PARTITION, PLATFORM } from './util/constants';
+import { getWindowIcon, IS_WAYLAND, MESSENGER_URL, PARTITION, PLATFORM } from './util/constants';
 import { setupMacApplicationMenu } from './menu';
 import { isInternalUrl, setupNavigationGuard } from './util/navigation';
 import { settings } from './persistence/settings';
@@ -58,8 +58,9 @@ export function createMainWindow(appCallbacks: AppCallbacks): void {
   }
 
   mainWindow = new BrowserWindow({
-    x: windowState.x,
-    y: windowState.y,
+    // On Wayland, absolute coordinates are managed by the compositor; setting them causes
+    // the window to jump when the user first drags it.
+    ...(!IS_WAYLAND && { x: windowState.x, y: windowState.y }),
     width: windowState.width,
     height: windowState.height,
     minWidth: 640,
