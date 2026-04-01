@@ -72,7 +72,8 @@ jobs:
           if-no-files-found: error
           path: |
             dist/*.exe
-            dist/*.AppImage
+            dist/*.deb
+            dist/*.rpm
             dist/*.dmg
 
   release:

@@ -6,7 +6,8 @@
   "license": "MIT",
   "homepage": "https://mkavalecz.github.io/messenger-desktop",
   "author": {
-    "name": "Máté Kavalecz"
+    "name": "Máté Kavalecz",
+    "email": "messenger.desktop@mattwolf.it"
   },
   "scripts": {
     "start": "tsc && concurrently -k \"tsc -w --preserveWatchOutput\" \"electronmon .\"",
@@ -39,13 +40,17 @@
     },
     "linux": {
       "icon": "icons/icon.png",
-      "target": "AppImage"
+      "target": [
+        "deb",
+        "rpm"
+      ],
+      "category": "Network"
     }
   },
   "overrides": {
     "picomatch": ">=4.0.4",
     "handlebars": ">=4.7.9",
-    "@xmldom/xmldom": ">=0.8.12"
+    "@xmldom/xmldom": "~0.8.12"
   },
   "devDependencies": {
     "@eslint/js": "^9",
