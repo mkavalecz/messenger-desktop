@@ -77,18 +77,9 @@ function syncTray(): void {
     tray.on('click', () => {
       callbacks!.toggleWindow();
     });
-    if (PLATFORM === 'linux') {
-      // On Linux (GNOME/AppIndicator), setContextMenu hijacks left-click to show the menu,
-      // breaking the toggle behaviour. Instead, pop up the menu only on right-click.
-      tray.on('right-click', () => {
-        tray!.popUpContextMenu(buildMenu());
-      });
-    }
   }
 
-  if (PLATFORM !== 'linux') {
-    tray.setContextMenu(buildMenu());
-  }
+  tray.setContextMenu(buildMenu());
 }
 
 function showBadge(show: boolean) {

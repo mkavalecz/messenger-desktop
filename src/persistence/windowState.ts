@@ -51,8 +51,7 @@ export function saveBounds(browserWindow: BrowserWindow): void {
   // On Wayland, absolute window coordinates are unreliable — skip them to avoid
   // the window jumping to a wrong position on next launch or during drag.
   if (IS_WAYLAND) {
-    windowState.width = width;
-    windowState.height = height;
+    Object.assign(windowState, { width, height });
   } else {
     Object.assign(windowState, { x, y, width, height });
   }
