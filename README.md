@@ -12,6 +12,8 @@ All communication occurs directly between the user and the official Messenger se
 
 This is an independent software project and is not affiliated with, endorsed by, or sponsored by Meta Platforms, Inc. 
 
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/V7V71X2P5Z)
+
 ## Prerequisites
 
 | Tool | Install |
