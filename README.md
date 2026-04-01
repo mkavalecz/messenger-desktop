@@ -64,3 +64,21 @@ macOS will block the app on first launch because it is not notarized.
 5. On the first launch (or after an update) allow microphone and camera access
 
 After this first launch, you can open the app normally.
+
+### Linux
+
+### Debian-based distributions (.deb)
+
+Install:  
+`sudo dpkg -i messenger-desktop_*_amd64.deb`
+
+Uninstall:  
+`sudo dpkg -r messenger-desktop`
+
+### RedHat-based distributions (.rpm)
+
+Install:  
+`sudo rpm -U messenger-desktop-*.x86_64.rpm`
+
+Uninstall:  
+`sudo rpm -e messenger-desktop`
