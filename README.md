@@ -14,25 +14,6 @@ This is an independent software project and is not affiliated with, endorsed by,
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/V7V71X2P5Z)
 
-## Prerequisites
-
-| Tool | Install |
-|------|---------|
-| Node.js | https://nodejs.org |
-
-## Quick Start
-
-```bash
-# Install dependencies
-npm install
-
-# Run the app
-npm start
-
-# Build distributable installer
-npm run build
-```
-
 ## Features
 
 - System tray integration with close-to-tray and minimize-to-tray as options
@@ -84,3 +65,24 @@ Install:
 
 Uninstall:  
 `sudo rpm -e messenger-desktop`
+
+## Development
+
+### Prerequisites
+
+| Tool | Install |
+|------|---------|
+| Node.js | https://nodejs.org |
+
+### Quick Start
+
+```bash
+# Install dependencies
+npm install
+
+# Run the app
+npm start
+
+# Build distributable installer
+npm run build
+```
