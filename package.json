@@ -50,7 +50,7 @@
   "overrides": {
     "picomatch": "^4.0.4",
     "handlebars": "^4.7.9",
-    "@xmldom/xmldom": "^0.8.12",
+    "@xmldom/xmldom": "^0.8.13",
     "lodash": "^4.18.0"
   },
   "devDependencies": {
