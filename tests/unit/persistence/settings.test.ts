@@ -24,6 +24,7 @@ describe('settings', () => {
 
   const DEFAULTS = {
     show_notifications: true,
+    spell_check: true,
     minimize_to_tray: true,
     close_to_tray: true,
     start_minimized: false,

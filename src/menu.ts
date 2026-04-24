@@ -1,6 +1,6 @@
 import { saveSettings, settings } from './persistence/settings';
-import { app, Menu, MenuItemConstructorOptions } from 'electron';
-import { PLATFORM } from './util/constants';
+import { app, Menu, MenuItemConstructorOptions, session } from 'electron';
+import { PARTITION, PLATFORM } from './util/constants';
 import { isRunOnStartup, setRunOnStartup } from './util/startup';
 import { checkForUpdates } from './util/updater';
 import { showAboutWindow } from './about';
@@ -63,6 +63,14 @@ export function buildMenuItems(): MenuItemConstructorOptions[] {
       type: 'checkbox',
       checked: settings.show_notifications,
       click: toggleSetting('show_notifications')
+    },
+    {
+      label: 'Enable spell check',
+      type: 'checkbox',
+      checked: settings.spell_check,
+      click: toggleSetting('spell_check', () => {
+        session.fromPartition(PARTITION).setSpellCheckerEnabled(settings.spell_check);
+      })
     },
     { type: 'separator' }
   ];
@@ -134,10 +142,11 @@ export function refreshMenu(): void {
   }
 }
 
-function toggleSetting(key: keyof typeof settings): () => void {
+function toggleSetting(key: keyof typeof settings, afterToggle?: () => void): () => void {
   return () => {
     settings[key] = !settings[key];
     saveSettings();
+    afterToggle?.();
     refreshMenu();
   };
 }

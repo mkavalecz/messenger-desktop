@@ -34,7 +34,7 @@ export function showWindow(): void {
     // After hide()/show() on Wayland, Electron restores the window using its cached position
     // (from getBounds(), which returns unreliable values on Wayland). This causes a mismatch
     // between Electron's internal position and where the compositor actually placed the window,
-    // making dragging jump. Re-centering syncs both sides so the grab offset is correct.
+    // making dragging jump. Re-centering syncs both sides, so the grab offset is correct.
     mainWindow.center();
   }
   mainWindow.focus();
@@ -104,6 +104,8 @@ export function createMainWindow(appCallbacks: AppCallbacks): void {
 
 // Configures menu, permissions, navigation restrictions, and notifications for the window
 function setupWindow(browserWindow: BrowserWindow, onTitleUpdate: (title: string) => void): void {
+  session.fromPartition(PARTITION).setSpellCheckerEnabled(settings.spell_check);
+
   session.fromPartition(PARTITION).setPermissionRequestHandler((_wc, permission, callback) => {
     log.info('Permission request:', permission);
     callback(true);
