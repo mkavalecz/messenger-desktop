@@ -5,6 +5,7 @@ import { readJsonFile } from './persistence';
 
 export interface Settings {
   show_notifications: boolean;
+  spell_check: boolean;
   show_tray_icon: boolean;
   minimize_to_tray: boolean;
   close_to_tray: boolean;
@@ -16,6 +17,7 @@ const log = createLogger('settings');
 
 export const settings: Settings = {
   show_notifications: true,
+  spell_check: true,
   show_tray_icon: true,
   minimize_to_tray: true,
   close_to_tray: true,
