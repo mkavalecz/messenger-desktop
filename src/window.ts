@@ -108,7 +108,7 @@ function setupWindow(browserWindow: BrowserWindow, onTitleUpdate: (title: string
 
   session.fromPartition(PARTITION).setPermissionRequestHandler((_wc, permission, callback) => {
     log.info('Permission request:', permission);
-    callback(true);
+    callback(permission !== 'notifications');
   });
 
   browserWindow.setMenuBarVisibility(false);
