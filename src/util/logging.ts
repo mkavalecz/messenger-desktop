@@ -1,9 +1,10 @@
 import fs from 'fs';
 import zlib from 'zlib';
 import path from 'path';
-import { getLogFile, getLogsDir, LOG_ROTATION_MAX_FILES, LOG_ROTATION_SIZE_BYTES } from './constants';
+import { getLogFile, getLogsDir, IS_DEBUG, LOG_ROTATION_MAX_FILES, LOG_ROTATION_SIZE_BYTES } from './constants';
 
 export interface Logger {
+  debug: (message: string, ...args: unknown[]) => void;
   info: (message: string, ...args: unknown[]) => void;
   warn: (message: string, ...args: unknown[]) => void;
   error: (message: string, ...args: unknown[]) => void;
@@ -16,6 +17,12 @@ let rotationFailed = false;
 
 export function createLogger(module: string): Logger {
   return {
+    debug: (message: string, ...args: unknown[]) => {
+      if (IS_DEBUG) {
+        console.log(`[${module}] ${message}`, ...args);
+        writeToFile('DEBUG', module, message, args);
+      }
+    },
     info: (message: string, ...args: unknown[]) => {
       console.log(`[${module}] ${message}`, ...args);
       writeToFile('INFO', module, message, args);
