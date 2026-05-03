@@ -10,7 +10,7 @@
     "email": "messenger.desktop@mattwolf.it"
   },
   "scripts": {
-    "start": "tsc && concurrently -k \"tsc -w --preserveWatchOutput\" \"electronmon . -- --debug\"",
+    "start": "tsc && concurrently -k \"tsc -w --preserveWatchOutput\" \"electronmon . -- --debug-mode\"",
     "clean": "rimraf dist out",
     "build": "npm run clean && tsc && electron-builder",
     "build:ci": "npm run clean && tsc && electron-builder --publish never",

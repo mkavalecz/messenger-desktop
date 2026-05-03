@@ -15,7 +15,7 @@ npm test -- --testNamePattern="preserves original" # Run tests matching a patter
 
 > Always use `npm run build` — never `npm run dev`.
 
-**Debug mode:** Pass `--debug` to the Electron process to open DevTools automatically on launch. `npm start` includes this flag by default. In production, run `messenger-desktop --debug` to enable it.
+**Debug mode:** Pass `--debug-mode` to the Electron process to open DevTools automatically on launch. `npm start` includes this flag by default. In production, run `messenger-desktop --debug-mode` to enable it.
 
 ## Architecture
 
