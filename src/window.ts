@@ -110,7 +110,12 @@ export function createMainWindow(appCallbacks: AppCallbacks): void {
 function setupWindow(browserWindow: BrowserWindow, onTitleUpdate: (title: string) => void): void {
   session.fromPartition(PARTITION).setSpellCheckerEnabled(settings.spell_check);
 
-  session.fromPartition(PARTITION).setPermissionRequestHandler((_wc, permission, callback) => {
+  session.fromPartition(PARTITION).setPermissionCheckHandler((_webContents, permission) => {
+    log.debug('Permission check:', permission);
+    return permission !== 'notifications';
+  });
+
+  session.fromPartition(PARTITION).setPermissionRequestHandler((_webContents, permission, callback) => {
     log.info('Permission request:', permission);
     callback(permission !== 'notifications');
   });
