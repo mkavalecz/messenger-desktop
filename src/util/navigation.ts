@@ -38,7 +38,7 @@ const NAVIGATION_GUARD_SCRIPT = `(function() {
 
 // Handles open-external IPC messages sent by the renderer via the preload bridge.
 ipcMain.on('open-external', (_e, url: string) => {
-  log.info('Opening external URL from renderer:', url);
+  log.debug('Opening external URL from renderer:', url);
   void shell.openExternal(url);
 });
 
@@ -48,7 +48,7 @@ ipcMain.on('open-external', (_e, url: string) => {
 export function setupNavigationGuard(browserWindow: BrowserWindow, isMainWindow: boolean): void {
   const blockExternal = (e: Electron.Event, url: string): void => {
     if (!isInternalUrl(url)) {
-      log.info('Redirecting external URL to system browser:', url);
+      log.debug('Redirecting external URL to system browser:', url);
       e.preventDefault();
       if (!isMainWindow) {
         browserWindow.destroy();

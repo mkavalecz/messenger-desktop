@@ -1,6 +1,6 @@
 import path from 'path';
 import { app, BrowserWindow, Menu, session, shell } from 'electron';
-import { getWindowIcon, IS_WAYLAND, MESSENGER_URL, PARTITION, PLATFORM } from './util/constants';
+import { getWindowIcon, IS_DEBUG, IS_WAYLAND, MESSENGER_URL, PARTITION, PLATFORM } from './util/constants';
 import { setupMacApplicationMenu } from './menu';
 import { isInternalUrl, setupNavigationGuard } from './util/navigation';
 import { settings } from './persistence/settings';
@@ -89,6 +89,10 @@ export function createMainWindow(appCallbacks: AppCallbacks): void {
   log.info('Loading', MESSENGER_URL);
   void mainWindow.loadURL(MESSENGER_URL);
 
+  if (IS_DEBUG) {
+    mainWindow.webContents.openDevTools();
+  }
+
   if (!settings.start_minimized) {
     if (windowState.maximized) {
       mainWindow.maximize();
@@ -118,7 +122,7 @@ function setupWindow(browserWindow: BrowserWindow, onTitleUpdate: (title: string
     if (isInternalUrl(url)) {
       return { action: 'allow', overrideBrowserWindowOptions: { show: false } };
     }
-    log.info('Redirecting external popup to system browser:', url);
+    log.debug('Redirecting external popup to system browser:', url);
     void shell.openExternal(url);
     return { action: 'deny' };
   });
