@@ -64,7 +64,7 @@ describe('notifications', () => {
       isFocused: jest.fn<boolean, []>(),
       isVisible: jest.fn<boolean, []>(),
       getTitle: jest.fn<string, []>()
-    }) as MockWindowInstance;
+    });
     instance.isFocused.mockImplementation(() => instance.focused);
     instance.isVisible.mockImplementation(() => instance.visible);
     instance.getTitle.mockImplementation(() => instance.currentTitle);

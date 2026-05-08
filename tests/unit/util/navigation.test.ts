@@ -1,4 +1,5 @@
 jest.mock('electron', () => ({
+  app: { commandLine: { hasSwitch: () => false } },
   ipcMain: { on: jest.fn() },
   shell: { openExternal: jest.fn() },
   nativeImage: { createFromPath: jest.fn() }

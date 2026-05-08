@@ -1,7 +1,10 @@
 import path from 'path';
 
 const mockNativeImage = { createFromPath: jest.fn((p: string) => ({ path: p })) };
-jest.mock('electron', () => ({ nativeImage: mockNativeImage }));
+jest.mock('electron', () => ({
+  app: { commandLine: { hasSwitch: () => false }, getPath: jest.fn() },
+  nativeImage: mockNativeImage
+}));
 
 describe('getWindowIcon', () => {
   const originalPlatform = process.platform;

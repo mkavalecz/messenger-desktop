@@ -9,7 +9,7 @@ describe('windowState', () => {
   beforeEach(() => {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'messenger-windowstate-test-'));
     jest.resetModules();
-    jest.doMock('electron', () => ({ app: { getPath: jest.fn().mockReturnValue(tmpDir) } }));
+    jest.doMock('electron', () => ({ app: { commandLine: { hasSwitch: () => false }, getPath: jest.fn().mockReturnValue(tmpDir) } }));
     jest.doMock('../../../src/util/logging', () => ({
       createLogger: () => ({ info: jest.fn(), warn: jest.fn(), error: jest.fn() })
     }));
