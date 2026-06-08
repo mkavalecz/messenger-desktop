@@ -45,6 +45,13 @@ export function setupMacApplicationMenu(): void {
         { role: 'paste' },
         { role: 'selectAll' }
       ]
+    },
+    {
+      label: 'Window',
+      submenu: [
+        { role: 'minimize' },
+        { role: 'close' }
+      ]
     }
   ];
 
