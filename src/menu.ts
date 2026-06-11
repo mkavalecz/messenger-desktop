@@ -48,10 +48,7 @@ export function setupMacApplicationMenu(): void {
     },
     {
       label: 'Window',
-      submenu: [
-        { role: 'minimize' },
-        { role: 'close' }
-      ]
+      submenu: [{ role: 'minimize' }, { role: 'close' }]
     }
   ];
 
@@ -95,13 +92,13 @@ export function buildMenuItems(): MenuItemConstructorOptions[] {
 
   items = items.concat([
     {
-      label: 'Minimize to tray',
+      label: `Minimize to ${PLATFORM === 'darwin' ? 'menu bar' : 'tray'}`,
       type: 'checkbox',
       checked: settings.minimize_to_tray,
       click: toggleSetting('minimize_to_tray')
     },
     {
-      label: 'Close to tray',
+      label: `Close to ${PLATFORM === 'darwin' ? 'menu bar' : 'tray'}`,
       type: 'checkbox',
       checked: settings.close_to_tray,
       click: toggleSetting('close_to_tray')
