@@ -25,6 +25,8 @@ This is an independent software project and is not affiliated with, endorsed by,
 - Voice and video call support
 - Windows, macOS, and Linux support
 
+Note: The "tray" keyword consistently refers to the menu bar on Mac.
+
 ## Installation
 
 ### Windows
@@ -63,6 +65,17 @@ Install:
 
 Uninstall:  
 `sudo rpm -e messenger-desktop`
+
+## Troubleshooting
+If you encounter unexpected issues, please try to reset the app:
+1. Shut down the app.
+2. Remove the configuration directory:
+    - Windows: `%APPDATA%/Messenger Desktop`
+    - Linux: `$XDG_CONFIG_HOME/Messenger Desktop` or `~/.config/Messenger Desktop`
+    - macOS: `~/Library/Application Support/Messenger Desktop`
+3. Start the app.
+
+If the issue is still not solved, or it happens frequently, please [report a bug](https://github.com/mkavalecz/messenger-desktop/issues/new?template=bug_report.md).
 
 ## Development
 
