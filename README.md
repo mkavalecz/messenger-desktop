@@ -46,6 +46,7 @@ macOS will block the app on first launch because it is not notarized.
 4. After allowing the application to run on the system start the application again
 5. On the first launch (or after an update) allow microphone and camera access
 
+You might also need to run `xattr -cr /Applications/Messenger\ Desktop.app` to allow the app to start.  
 After this first launch, you can open the app normally.
 
 ### Linux
