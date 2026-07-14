@@ -8,6 +8,7 @@ import { loadWindowState, saveBounds, saveWindowState, windowState } from './per
 import { createLogger } from './util/logging';
 import { resetNotificationLock, setupWindowNotifications } from './util/notification';
 import { hideDockIcon, showDockIcon } from './dock';
+import { pickScreenShareSource } from './screenShare';
 
 export interface AppCallbacks {
   isQuitting: () => boolean;
@@ -119,6 +120,23 @@ function setupWindow(browserWindow: BrowserWindow, onTitleUpdate: (title: string
     log.info('Permission request:', permission);
     callback(permission !== 'notifications');
   });
+
+  session.fromPartition(PARTITION).setDisplayMediaRequestHandler(
+    (_request, callback) => {
+      pickScreenShareSource(browserWindow)
+        .then((source) => {
+          log.info('Screen share source selected:', source?.name ?? 'none');
+          callback(source ? { video: source } : {});
+        })
+        .catch((error: unknown) => {
+          log.error('Screen share picker failed:', error);
+          callback({});
+        });
+    },
+    // Where available (currently macOS 15+), Electron uses the native picker and
+    // never calls the handler above; everywhere else it falls through to it.
+    { useSystemPicker: true }
+  );
 
   browserWindow.setMenuBarVisibility(false);
   setupNavigationGuard(browserWindow, true);

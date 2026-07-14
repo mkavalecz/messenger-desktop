@@ -41,6 +41,7 @@ export const GITHUB_RELEASES_API_URL = `https://api.github.com/repos/${GITHUB_RE
 export const ICONS_DIR = path.join(__dirname, '..', '..', 'icons');
 export const TRAY_ICON_DIR = path.join(ICONS_DIR, 'tray');
 export const ABOUT_HTML_PATH = path.join(__dirname, '..', '..', 'assets', 'about.html');
+export const SCREEN_SHARE_PICKER_HTML_PATH = path.join(__dirname, '..', '..', 'assets', 'screen-share-picker.html');
 
 export function getUserDataDir(): string {
   return app.getPath('userData');

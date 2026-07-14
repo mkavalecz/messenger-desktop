@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8"/>
+	<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:;"/>
+	<style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #0a0f1e;
+            color: #e8edf5;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        h1 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding: 14px 16px 10px;
+        }
+
+        .sources {
+            flex: 1;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            padding: 0 16px 16px;
+        }
+
+        .source {
+            background: #131b2e;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            text-align: left;
+        }
+
+        .source:hover {
+            border-color: #0084ff;
+        }
+
+        .source.selected {
+            border-color: #0084ff;
+            background: #16233d;
+        }
+
+        .thumbnail {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            object-fit: contain;
+            background: #000;
+            border-radius: 4px;
+        }
+
+        .name {
+            font-size: 0.78rem;
+            color: #c3ccdb;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .empty {
+            padding: 24px 16px;
+            color: #8896aa;
+            font-size: 0.85rem;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            padding: 12px 16px;
+            border-top: 1px solid #1f2d45;
+        }
+
+        button {
+            font: inherit;
+            font-size: 0.85rem;
+            padding: 7px 16px;
+            border-radius: 6px;
+            border: 1px solid #2a3a58;
+            background: #131b2e;
+            color: #e8edf5;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1a2540;
+        }
+
+        button.primary {
+            background: #0084ff;
+            border-color: #0084ff;
+            color: #fff;
+        }
+
+        button.primary:disabled {
+            background: #2a3a58;
+            border-color: #2a3a58;
+            color: #8896aa;
+            cursor: default;
+        }
+
+        button.primary:not(:disabled):hover {
+            background: #0073e0;
+        }
+	</style>
+	<title>Choose what to share</title>
+</head>
+<body>
+<div class="sources" id="sources"></div>
+<div class="actions">
+	<button id="cancel">Cancel</button>
+	<button id="share" class="primary" disabled>Share</button>
+</div>
+
+<script>
+	let selectedId = null;
+
+	const sourcesEl = document.getElementById('sources');
+	const shareBtn = document.getElementById('share');
+	const cancelBtn = document.getElementById('cancel');
+
+	function selectSource(id) {
+		selectedId = id;
+		shareBtn.disabled = false;
+		for (const el of sourcesEl.querySelectorAll('.source')) {
+			el.classList.toggle('selected', el.dataset.id === id);
+		}
+	}
+
+	window.screenSharePicker.getSources().then((sources) => {
+		if (sources.length === 0) {
+			sourcesEl.innerHTML = '<div class="empty">No screens available to share.</div>';
+			return;
+		}
+		for (const source of sources) {
+			const el = document.createElement('div');
+			el.className = 'source';
+			el.dataset.id = source.id;
+
+			const img = document.createElement('img');
+			img.className = 'thumbnail';
+			img.src = source.thumbnailDataUrl;
+			img.alt = source.name;
+
+			const name = document.createElement('div');
+			name.className = 'name';
+			name.textContent = source.name;
+
+			el.append(img, name);
+			el.addEventListener('click', () => selectSource(source.id));
+			el.addEventListener('dblclick', () => {
+				selectSource(source.id);
+				window.screenSharePicker.select(source.id);
+			});
+
+			sourcesEl.append(el);
+		}
+	});
+
+	shareBtn.addEventListener('click', () => {
+		if (selectedId) {
+			window.screenSharePicker.select(selectedId);
+		}
+	});
+
+	cancelBtn.addEventListener('click', () => {
+		window.screenSharePicker.cancel();
+	});
+
+	document.addEventListener('keydown', (e) => {
+		if (e.key === 'Escape') {
+			window.screenSharePicker.cancel();
+		}
+	});
+</script>
+</body>
+</html>
