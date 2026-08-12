@@ -70,5 +70,9 @@
     "ts-jest": "^29.4.11",
     "typescript": "^6.0",
     "typescript-eslint": "^8.64.0"
+  },
+  "allowScripts": {
+    "unrs-resolver@1.12.2": true,
+    "electron-winstaller@5.4.0": true
   }
 }
