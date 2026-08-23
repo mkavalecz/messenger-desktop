@@ -9,6 +9,7 @@ import { createLogger } from './util/logging';
 import { resetNotificationLock, setupWindowNotifications } from './util/notification';
 import { hideDockIcon, showDockIcon } from './dock';
 import { pickScreenShareSource } from './screenShare';
+import contextMenu from 'electron-context-menu';
 
 export interface AppCallbacks {
   isQuitting: () => boolean;
@@ -64,6 +65,12 @@ export function createMainWindow(appCallbacks: AppCallbacks): void {
   } else {
     Menu.setApplicationMenu(null);
   }
+
+  contextMenu({
+    showLookUpSelection: false,
+    showSearchWithGoogle: false,
+    showSaveImageAs: true
+  });
 
   mainWindow = new BrowserWindow({
     // On Wayland, absolute coordinates are managed by the compositor; setting them causes

@@ -74,5 +74,8 @@
   "allowScripts": {
     "unrs-resolver@1.12.2": true,
     "electron-winstaller@5.4.0": true
+  },
+  "dependencies": {
+    "electron-context-menu": "^4.1.2"
   }
 }
