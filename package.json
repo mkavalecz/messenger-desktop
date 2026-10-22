@@ -55,7 +55,7 @@
     "@eslint/js": "^10.0.1",
     "@types/jest": "^30.0.0",
     "@types/node": "^24",
-    "concurrently": "^10.0.5",
+    "concurrently": "^10.0.6",
     "electron": "^44.5.1",
     "electron-builder": "^26.17.0",
     "electronmon": "^2.0.4",
