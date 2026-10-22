@@ -1,7 +1,7 @@
 # Messenger Desktop
 
 A lightweight desktop wrapper for Facebook Messenger built with Electron.  
-Loads https://www.facebook.com/messages, and provides desktop convenience features.
+Loads https://www.messenger.com, and provides desktop convenience features.
 
 The application was tested on the latest versions of Windows, macOS, Ubuntu LTS and Linux Mint (Cinnamon).  
 If you encounter any problems on other platforms, feel free to open an issue or a pull request.  
