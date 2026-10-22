@@ -1,23 +1,20 @@
 import { BrowserWindow, ipcMain, shell } from 'electron';
 import { createLogger } from './logging';
-import { INTERNAL_URL_RULES } from './constants';
+import { INTERNAL_URL_PATTERNS } from './constants';
 
 const log = createLogger('navigation');
 
 // Injected into the page's JS world on every dom-ready to block external navigation.
 // Uses a capture-phase click listener that fires before React sees the click, so
 // stopImmediatePropagation prevents React's router from ever processing it.
+// RegExp objects serialize to {} with JSON.stringify, so source/flags are passed and rebuilt in the page.
 const NAVIGATION_GUARD_SCRIPT = `(function() {
-  const INTERNAL_URL_RULES = ${JSON.stringify(INTERNAL_URL_RULES)};
+  const INTERNAL_URL_PATTERNS = ${JSON.stringify(INTERNAL_URL_PATTERNS.map(({ source, flags }) => ({ source, flags })))}
+    .map((pattern) => new RegExp(pattern.source, pattern.flags));
   function isInternal(url) {
     try {
       const absoluteUrl = new URL(url, location.href).href;
-      return INTERNAL_URL_RULES.some((rule) => {
-        if(rule.fullMatch) {
-          return absoluteUrl === rule.url;
-        }
-        return absoluteUrl.startsWith(rule.url);
-      });
+      return INTERNAL_URL_PATTERNS.some((pattern) => pattern.test(absoluteUrl));
     } catch {
       return false;
     }
@@ -69,10 +66,5 @@ export function setupNavigationGuard(browserWindow: BrowserWindow, isMainWindow:
 
 // Returns true if the URL belongs to Messenger.
 export function isInternalUrl(url?: string) {
-  return INTERNAL_URL_RULES.some((rule) => {
-    if (rule.fullMatch) {
-      return url === rule.url;
-    }
-    return url?.startsWith(rule.url) === true;
-  });
+  return url !== undefined && INTERNAL_URL_PATTERNS.some((pattern) => pattern.test(url));
 }
